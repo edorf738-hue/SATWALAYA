@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="gradient_start">#7C6FE0</color>
+    <color name="gradient_mid">#9E8FFE</color>
+    <color name="gradient_end">#B1A5FF</color>
+
+    <color name="bg_light">#121212</color>
+    <color name="bg_card">#1E1E1E</color>
+    <color name="bg_stat_card">#1E1E1E</color>
+
+    <color name="nav_bg">#1E1E1E</color>
+    <color name="nav_selected">#9E8FFE</color>
+    <color name="nav_unselected">#6B6B8A</color>
+
+    <color name="text_primary">#E8E8FF</color>
+    <color name="text_secondary">#9090AA</color>
+    <color name="text_price">#9E8FFE</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_teal">#2ABFBF</color>
+    <color name="text_amber">#FFB800</color>
+
+    <color name="btn_cancel_text">#FF6B6B</color>
+    <color name="status_green">#00C566</color>
+    <color name="divider_color">#2A2A3A</color>
+
+    <color name="bg_icon_orange">#3A2A1A</color>
+    <color name="bg_icon_purple">#2A2540</color>
+    <color name="bg_icon_blue">#1A2A3A</color>
+    <color name="bg_icon_teal">#1A3030</color>
+    <color name="bg_icon_red">#3A1A1A</color>
+</resources>

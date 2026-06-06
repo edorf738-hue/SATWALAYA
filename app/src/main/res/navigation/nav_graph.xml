@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.satwalaya.ui.home.HomeFragment"
+        android:label="Satwalaya"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_nav_home_to_hotelFragment"
+            app:destination="@id/hotelFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_groomingFragment"
+            app:destination="@id/groomingFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_editProfileFragment"
+            app:destination="@id/petListFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_helpSupportFragment"
+            app:destination="@id/helpSupportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_booking"
+        android:name="com.example.satwalaya.ui.booking.BookingFragment"
+        android:label="Layanan"
+        tools:layout="@layout/fragment_booking">
+        <action
+            android:id="@+id/action_nav_booking_to_bookingFormFragment"
+            app:destination="@id/bookingFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_history"
+        android:name="com.example.satwalaya.ui.history.HistoryFragment"
+        android:label="Riwayat"
+        tools:layout="@layout/fragment_history">
+        <action
+            android:id="@+id/action_history_to_dailyUpdates"
+            app:destination="@id/dailyUpdatesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.satwalaya.ui.profile.ProfileFragment"
+        android:label="Profil"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_nav_profile_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_petListFragment"
+            app:destination="@id/petListFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_notificationsFragment"
+            app:destination="@id/notificationsFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_helpSupportFragment"
+            app:destination="@id/helpSupportFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/hotelFragment"
+        android:name="com.example.satwalaya.ui.hotel.HotelFragment"
+        android:label="Pet Hotel &amp; Antar Jemput"
+        tools:layout="@layout/fragment_hotel">
+        <action
+            android:id="@+id/action_hotelFragment_to_bookingFormFragment"
+            app:destination="@id/bookingFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groomingFragment"
+        android:name="com.example.satwalaya.ui.grooming.GroomingFragment"
+        android:label="Grooming"
+        tools:layout="@layout/fragment_grooming">
+        <action
+            android:id="@+id/action_groomingFragment_to_bookingFormFragment"
+            app:destination="@id/bookingFormFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookingFormFragment"
+        android:name="com.example.satwalaya.ui.booking.BookingFormFragment"
+        android:label="Formulir Booking"
+        tools:layout="@layout/fragment_booking_form">
+        <argument
+            android:name="serviceName"
+            app:argType="string" />
+        <argument
+            android:name="servicePrice"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_bookingFormFragment_to_orderReviewFragment"
+            app:destination="@id/orderReviewFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderReviewFragment"
+        android:name="com.example.satwalaya.ui.payment.OrderReviewFragment"
+        android:label="Detail Pesanan"
+        tools:layout="@layout/fragment_order_review">
+        <action
+            android:id="@+id/action_orderReviewFragment_to_paymentFragment"
+            app:destination="@id/orderSuccessFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/paymentFragment"
+        android:name="com.example.satwalaya.ui.payment.PaymentFragment"
+        android:label="Pembayaran"
+        tools:layout="@layout/fragment_payment">
+        <action
+            android:id="@+id/action_paymentFragment_to_orderSuccessFragment"
+            app:destination="@id/orderSuccessFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderSuccessFragment"
+        android:name="com.example.satwalaya.ui.payment.OrderSuccessFragment"
+        android:label="Pembayaran"
+        tools:layout="@layout/fragment_order_success" />
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.example.satwalaya.ui.notifications.NotificationsFragment"
+        android:label="Notifikasi" />
+
+    <fragment
+        android:id="@+id/privacySecurityFragment"
+        android:name="com.example.satwalaya.ui.settings.PrivacySecurityFragment"
+        android:label="Privasi &amp; Keamanan" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.satwalaya.ui.settings.SettingsFragment"
+        android:label="Pengaturan" />
+
+    <fragment
+        android:id="@+id/helpSupportFragment"
+        android:name="com.example.satwalaya.ui.settings.HelpSupportFragment"
+        android:label="Bantuan &amp; Dukungan" />
+
+    <fragment
+        android:id="@+id/paymentMethodsFragment"
+        android:name="com.example.satwalaya.ui.payment.PaymentMethodsFragment"
+        android:label="Metode Pembayaran" />
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.example.satwalaya.ui.profile.EditProfileFragment"
+        android:label="Edit Profil"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <fragment
+        android:id="@+id/petListFragment"
+        android:name="com.example.satwalaya.ui.pet.PetListFragment"
+        android:label="My Pet ID"
+        tools:layout="@layout/fragment_pet_list">
+        <action
+            android:id="@+id/action_petList_to_addPet"
+            app:destination="@id/addPetFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addPetFragment"
+        android:name="com.example.satwalaya.ui.pet.AddPetFragment"
+        android:label="Tambah Hewan"
+        tools:layout="@layout/fragment_add_pet" />
+
+    <fragment
+        android:id="@+id/dailyUpdatesFragment"
+        android:name="com.example.satwalaya.ui.history.DailyUpdatesFragment"
+        android:label="Daily Updates"
+        tools:layout="@layout/fragment_daily_updates" />
+
+    <fragment
+        android:id="@+id/reviewListFragment"
+        android:name="com.example.satwalaya.ui.review.ReviewListFragment"
+        android:label="Ulasan Pelanggan"
+        tools:layout="@layout/fragment_review_list" />
+
+</navigation>

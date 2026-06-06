@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Primary Branding -->
+    <color name="gradient_start">#6A5AE0</color>
+    <color name="gradient_mid">#8E7CFE</color>
+    <color name="gradient_end">#B1A5FF</color>
+
+    <!-- Backgrounds -->
+    <color name="bg_light">#F5F7FF</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="bg_stat_card">#FFFFFF</color>
+
+    <!-- Navigation -->
+    <color name="nav_bg">#FFFFFF</color>
+    <color name="nav_selected">#6A5AE0</color>
+    <color name="nav_unselected">#A0A0C0</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#2D2D5E</color>
+    <color name="text_secondary">#8E8EAD</color>
+    <color name="text_price">#6A5AE0</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_teal">#2ABFBF</color>
+    <color name="text_amber">#FFB800</color>
+
+    <!-- UI Elements -->
+    <color name="btn_cancel_text">#FF5C5C</color>
+    <color name="status_green">#4CAF50</color>
+    <color name="status_orange">#FF9800</color>
+    <color name="divider_color">#E6E9F5</color>
+
+    <!-- Icon Backgrounds -->
+    <color name="bg_icon_orange">#FFF4E5</color>
+    <color name="bg_icon_purple">#F0EEFF</color>
+    <color name="bg_icon_blue">#E5F3FF</color>
+    <color name="bg_icon_teal">#E5F9F9</color>
+    <color name="bg_icon_red">#FFE5E5</color>
+
+    <!-- New Badge/Gradient Colors -->
+    <color name="grad_orange">#FF9800</color>
+    <color name="grad_purple">#6A5AE0</color>
+
+    <!-- Satwalaya V2 Colors -->
+    <color name="bg_screen">#FAFAFA</color>
+    <color name="purple_primary">#6C5CE7</color>
+    <color name="purple_light">#EEEDFE</color>
+    <color name="green_light">#E1F5EE</color>
+    <color name="green_dark">#0F6E56</color>
+    <color name="amber_light">#FAEEDA</color>
+    <color name="amber_dark">#BA7517</color>
+    <color name="amber_star">#EF9F27</color>
+    <color name="card_border">#14000000</color>
+</resources>

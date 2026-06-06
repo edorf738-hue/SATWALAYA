@@ -1,0 +1,109 @@
+<resources>
+    <string name="app_name">Satwalaya</string>
+
+    <!-- Login & Register -->
+    <string name="welcome_back">Selamat Datang Kembali!</string>
+    <string name="sign_in_subtitle">Masuk ke akun Satwalaya Anda</string>
+    <string name="email_hint">Alamat Email</string>
+    <string name="password_hint">Kata Sandi</string>
+    <string name="sign_in">Masuk</string>
+    <string name="new_here_register">Baru di sini? Buat Akun</string>
+    <string name="join_us">Bergabunglah</string>
+    <string name="register_subtitle">Mulai perjalanan anabul Anda hari ini</string>
+    <string name="full_name_label">Nama Lengkap</string>
+    <string name="phone_label">Nomor Telepon</string>
+    <string name="create_account">Daftar Akun</string>
+    <string name="already_have_account">Sudah punya akun? Masuk</string>
+    <string name="email_sample">email@contoh.com</string>
+
+    <!-- Home -->
+    <string name="hello_pet_owner">Halo, %1$s! 👋</string>
+    <string name="points_label">Poin: %1$d</string>
+    <string name="active_bookings">Booking Aktif</string>
+    <string name="satwalaya_rating">Rating Satwalaya</string>
+    <string name="popular_services">Layanan &amp; Fitur</string>
+    <string name="service_hotel">Pet Hotel</string>
+    <string name="service_hotel_desc">Hotel &amp; Antar Jemput</string>
+    <string name="service_grooming">Grooming</string>
+    <string name="service_grooming_desc">Perawatan Spa Pro</string>
+    <string name="service_pickup">Layanan Antar Jemput</string>
+    <string name="service_data_pet">Data Hewan</string>
+    <string name="service_data_pet_desc">Profil anabul Anda</string>
+    <string name="service_support">Bantuan Pelanggan</string>
+    <string name="service_support_desc">Hubungi bantuan</string>
+    <string name="points_balance">Poin Satwalaya Saya</string>
+    <string name="redeem">Tukar Poin</string>
+
+    <!-- Booking Form -->
+    <string name="booking_details">Detail Pesanan</string>
+    <string name="form_subtitle">Silakan lengkapi informasi di bawah ini</string>
+    <string name="owner_info">Informasi Pemilik</string>
+    <string name="pet_info">Informasi Hewan</string>
+    <string name="pet_name_hint">Nama Hewan</string>
+    <string name="pet_age_hint">Usia Hewan (misal: 2 tahun)</string>
+    <string name="pet_allergies_hint">Alergi Hewan (Isi "Tidak ada" jika kosong)</string>
+    <string name="proceed_to_payment">Lanjut</string>
+    <string name="address_hint">Alamat Lengkap Penjemputan/Rumah</string>
+
+    <!-- Hotel & Grooming Screens -->
+    <string name="hotel_title">Pet Hotel &amp; Penjemputan</string>
+    <string name="hotel_subtitle">Titipkan anabul Anda dengan aman</string>
+    <string name="grooming_title">Layanan Grooming</string>
+    <string name="grooming_subtitle">Perawatan pro untuk kebersihan anabul</string>
+    <string name="book_now">Pesan Sekarang</string>
+    <string name="start_from">Mulai dari</string>
+    <string name="service_name_placeholder">Nama Layanan</string>
+    <string name="service_desc_placeholder">Layanan profesional untuk hewan Anda</string>
+
+    <!-- Payment -->
+    <string name="payment_method">Metode Pembayaran</string>
+    <string name="payment_subtitle">Pilih cara pembayaran Anda</string>
+    <string name="order_summary">Ringkasan Pesanan</string>
+    <string name="confirm_and_order">Lanjutkan Pembayaran</string>
+    <string name="bank_transfer">Transfer Bank</string>
+    <string name="digital_wallet">Dompet Digital (GOPAY/OVO)</string>
+    <string name="cash_on_pickup">Bayar di Tempat (Tunai)</string>
+    <string name="saved_card_label">Kartu Tersimpan (**** %1$s)</string>
+    <string name="saved_card_title">Kartu Tersimpan</string>
+
+    <!-- Profile & Settings -->
+    <string name="account_settings">Pengaturan Akun</string>
+    <string name="edit_profile">Edit Profil</string>
+    <string name="notifications">Notifikasi</string>
+    <string name="payment_methods">Metode Pembayaran</string>
+    <string name="privacy_security">Privasi &amp; Keamanan</string>
+    <string name="app_settings">Pengaturan Aplikasi</string>
+    <string name="help_support">Bantuan &amp; Dukungan</string>
+    <string name="logout">Keluar Akun</string>
+    <string name="danger_zone">Zona Bahaya</string>
+    <string name="clear_history">Hapus Semua Riwayat Booking</string>
+    <string name="personal_details">Detail Pribadi</string>
+    <string name="save_changes">Simpan Semua Perubahan</string>
+    <string name="edit_profile_subtitle">Perbarui informasi pribadi dan hewan Anda</string>
+    <string name="edit_label">Ubah</string>
+
+    <!-- History -->
+    <string name="booking_history">Riwayat Booking</string>
+    <string name="history_subtitle">Pantau dan kelola pesanan Anda</string>
+    <string name="cancel_booking">Batalkan Booking</string>
+    <string name="total_price">Total Harga</string>
+    <string name="booking_detail_title">Detail Booking</string>
+    <string name="detail_owner">Pemilik: %1$s</string>
+    <string name="detail_address">Alamat: %1$s</string>
+    <string name="detail_pet">Hewan: %1$s (%2$s)</string>
+    <string name="detail_allergies">Alergi: %1$s</string>
+    <string name="detail_service">Layanan: %1$s</string>
+    <string name="detail_date">Tanggal: %1$s</string>
+    <string name="detail_price">Harga: %1$s</string>
+    <string name="detail_status">Status: %1$s</string>
+
+    <!-- Notifications Settings -->
+    <string name="notif_booking">Pembaruan Booking</string>
+    <string name="notif_promo">Promosi &amp; Penawaran</string>
+    <string name="notif_health">Tips Kesehatan Hewan</string>
+
+    <!-- Settings Screen -->
+    <string name="app_language">Bahasa Aplikasi</string>
+    <string name="dark_mode">Mode Gelap</string>
+    <string name="about_app">Tentang Satwalaya</string>
+</resources>
