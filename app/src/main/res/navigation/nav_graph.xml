@@ -11,12 +11,6 @@
         android:label="Satwalaya"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_nav_home_to_hotelFragment"
-            app:destination="@id/hotelFragment" />
-        <action
-            android:id="@+id/action_nav_home_to_groomingFragment"
-            app:destination="@id/groomingFragment" />
-        <action
             android:id="@+id/action_nav_home_to_editProfileFragment"
             app:destination="@id/petListFragment" />
         <action
@@ -64,26 +58,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/hotelFragment"
-        android:name="com.example.satwalaya.ui.hotel.HotelFragment"
-        android:label="Pet Hotel &amp; Antar Jemput"
-        tools:layout="@layout/fragment_hotel">
-        <action
-            android:id="@+id/action_hotelFragment_to_bookingFormFragment"
-            app:destination="@id/bookingFormFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/groomingFragment"
-        android:name="com.example.satwalaya.ui.grooming.GroomingFragment"
-        android:label="Grooming"
-        tools:layout="@layout/fragment_grooming">
-        <action
-            android:id="@+id/action_groomingFragment_to_bookingFormFragment"
-            app:destination="@id/bookingFormFragment" />
-    </fragment>
-
-    <fragment
         android:id="@+id/bookingFormFragment"
         android:name="com.example.satwalaya.ui.booking.BookingFormFragment"
         android:label="Formulir Booking"
@@ -105,17 +79,7 @@
         android:label="Detail Pesanan"
         tools:layout="@layout/fragment_order_review">
         <action
-            android:id="@+id/action_orderReviewFragment_to_paymentFragment"
-            app:destination="@id/orderSuccessFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/paymentFragment"
-        android:name="com.example.satwalaya.ui.payment.PaymentFragment"
-        android:label="Pembayaran"
-        tools:layout="@layout/fragment_payment">
-        <action
-            android:id="@+id/action_paymentFragment_to_orderSuccessFragment"
+            android:id="@+id/action_orderReviewFragment_to_orderSuccessFragment"
             app:destination="@id/orderSuccessFragment" />
     </fragment>
 
@@ -131,24 +95,9 @@
         android:label="Notifikasi" />
 
     <fragment
-        android:id="@+id/privacySecurityFragment"
-        android:name="com.example.satwalaya.ui.settings.PrivacySecurityFragment"
-        android:label="Privasi &amp; Keamanan" />
-
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.satwalaya.ui.settings.SettingsFragment"
-        android:label="Pengaturan" />
-
-    <fragment
         android:id="@+id/helpSupportFragment"
         android:name="com.example.satwalaya.ui.settings.HelpSupportFragment"
         android:label="Bantuan &amp; Dukungan" />
-
-    <fragment
-        android:id="@+id/paymentMethodsFragment"
-        android:name="com.example.satwalaya.ui.payment.PaymentMethodsFragment"
-        android:label="Metode Pembayaran" />
 
     <fragment
         android:id="@+id/editProfileFragment"

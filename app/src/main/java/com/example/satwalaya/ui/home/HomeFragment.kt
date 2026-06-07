@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.fragment.app.viewModels
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.example.satwalaya.ui.booking.BookingFragment
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -48,11 +49,15 @@ class HomeFragment : Fragment() {
         }
 
         binding.cardHotel.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_hotelFragment)
+            BookingFragment.openTab = "hotel"
+            val bottomNav = activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
+            bottomNav?.selectedItemId = R.id.nav_booking
         }
 
         binding.cardGrooming.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_home_to_groomingFragment)
+            BookingFragment.openTab = "grooming"
+            val bottomNav = activity?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
+            bottomNav?.selectedItemId = R.id.nav_booking
         }
 
         binding.cardDataHewan.setOnClickListener {

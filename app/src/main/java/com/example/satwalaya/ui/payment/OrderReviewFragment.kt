@@ -196,7 +196,10 @@ class OrderReviewFragment : Fragment() {
             putInt("totalPrice", totalPrice)
             putString("paymentMethod", selectedMethod)
         }
-        findNavController().navigate(R.id.action_orderReviewFragment_to_paymentFragment, bundle)
+        findNavController().navigate(
+            R.id.action_orderReviewFragment_to_orderSuccessFragment,
+            bundle
+        )
     }
 
     private fun formatPrice(price: Int): String {
