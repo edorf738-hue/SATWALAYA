@@ -70,6 +70,12 @@ class HomeFragment : Fragment() {
         binding.btnAddPet.setOnClickListener {
             findNavController().navigate(R.id.action_nav_home_to_editProfileFragment)
         }
+
+        binding.btnNotification.setOnClickListener {
+            findNavController().navigate(R.id.action_nav_home_to_notificationsFragment)
+        }
+
+        loadNotifBadge()
     }
 
     private fun loadData() {
@@ -135,6 +141,25 @@ class HomeFragment : Fragment() {
                                 .placeholder(R.drawable.bg_pet_icon)
                                 .into(it.ivPetPhoto)
                         }
+                    }
+                }
+            }
+    }
+
+    private fun loadNotifBadge() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance()
+            .collection("notifications")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, _ ->
+                val count = snapshots?.size() ?: 0
+                _binding?.tvNotifBadge?.let { badge ->
+                    if (count > 0) {
+                        badge.visibility = View.VISIBLE
+                        badge.text = if (count > 9) "9+" else count.toString()
+                    } else {
+                        badge.visibility = View.GONE
                     }
                 }
             }
