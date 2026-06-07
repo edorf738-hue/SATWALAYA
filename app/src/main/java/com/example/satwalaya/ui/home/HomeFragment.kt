@@ -4,16 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.example.satwalaya.R
-import com.example.satwalaya.utils.SessionManager
-import com.example.satwalaya.databinding.FragmentHomeBinding
-import com.google.firebase.auth.FirebaseAuth
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.example.satwalaya.R
+import com.example.satwalaya.databinding.FragmentHomeBinding
+import com.example.satwalaya.ui.booking.BookingFragment
+import com.example.satwalaya.utils.SessionManager
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.example.satwalaya.ui.booking.BookingFragment
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -30,7 +33,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        // Setup observers — Fragment cuma "dengerin" perubahan data
         viewModel.userName.observe(viewLifecycleOwner) { name ->
             binding.tvWelcomeName.text = "Halo, $name!"
         }
@@ -39,7 +41,6 @@ class HomeFragment : Fragment() {
             binding.tvActiveCount.text = count.toString()
         }
 
-        // Load data
         loadData()
         loadReviews()
         loadPets()
@@ -72,10 +73,11 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_nav_home_to_editProfileFragment)
         }
 
-        // TODO: Notifikasi — aktifkan setelah halaman notifikasi dibuat
-        // binding.btnNotification.setOnClickListener {
-        //     findNavController().navigate(R.id.nav_notifications)
-        // }
+        binding.btnNotification.setOnClickListener {
+            findNavController().navigate(R.id.action_nav_home_to_notificationsFragment)
+        }
+
+        loadNotifBadge()
     }
 
     private fun loadData() {
@@ -87,7 +89,6 @@ class HomeFragment : Fragment() {
     private fun loadReviews() {
         val db = FirebaseFirestore.getInstance()
 
-        // Load rating rata-rata
         db.collection("reviews").get()
             .addOnSuccessListener { docs ->
                 if (!docs.isEmpty) {
@@ -96,12 +97,12 @@ class HomeFragment : Fragment() {
                 }
             }
 
-        // Load review terbaru
         db.collection("reviews")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(1)
             .get()
             .addOnSuccessListener { documents ->
+                if (_binding == null) return@addOnSuccessListener
                 if (!documents.isEmpty) {
                     val review = documents.first()
                     val name = review.getString("userName") ?: "Pengguna"
@@ -109,11 +110,43 @@ class HomeFragment : Fragment() {
                     val rating = (review.getDouble("rating") ?: 5.0).toInt()
                     val stars = "⭐".repeat(rating)
 
-                    _binding?.let {
-                        it.tvReviewerName.text = name
-                        it.tvReviewText.text = comment
-                        it.tvReviewStars.text = stars
-                        it.tvReviewTime.text = "Baru saja"
+                    _binding?.let { b ->
+                        b.tvReviewerName.text = name
+                        b.tvReviewText.text = comment
+                        b.tvReviewStars.text = stars
+                        b.tvReviewTime.text = "Baru saja"
+
+                        // Load foto dari photoUrls array
+                        @Suppress("UNCHECKED_CAST")
+                        val photoUrls = review.get("photoUrls") as? List<String> ?: emptyList()
+
+                        if (photoUrls.isNotEmpty()) {
+                            b.scrollReviewPhotos.visibility = View.VISIBLE
+                            b.reviewPhotosContainer.removeAllViews()
+
+                            photoUrls.forEach { url ->
+                                val size = (64 * resources.displayMetrics.density).toInt()
+                                val margin = (6 * resources.displayMetrics.density).toInt()
+
+                                val iv = ImageView(requireContext()).apply {
+                                    layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                                        marginEnd = margin
+                                    }
+                                    scaleType = ImageView.ScaleType.CENTER_CROP
+                                    setBackgroundResource(R.drawable.bg_input_field)
+                                    clipToOutline = true
+                                }
+
+                                Glide.with(requireContext())
+                                    .load(url)
+                                    .centerCrop()
+                                    .into(iv)
+
+                                b.reviewPhotosContainer.addView(iv)
+                            }
+                        } else {
+                            b.scrollReviewPhotos.visibility = View.GONE
+                        }
                     }
                 }
             }
@@ -132,9 +165,36 @@ class HomeFragment : Fragment() {
                     val name = pet.getString("name") ?: "Hewan kamu"
                     val type = pet.getString("type") ?: ""
                     val breed = pet.getString("breed") ?: ""
+                    val photoUrl = pet.getString("photoUrl") ?: ""
                     _binding?.let {
                         it.tvPetName.text = name
                         it.tvPetDetail.text = "$type • $breed"
+                        if (photoUrl.isNotEmpty()) {
+                            Glide.with(this)
+                                .load(photoUrl)
+                                .circleCrop()
+                                .placeholder(R.drawable.bg_pet_icon)
+                                .into(it.ivPetPhoto)
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun loadNotifBadge() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance()
+            .collection("notifications")
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isRead", false)
+            .addSnapshotListener { snapshots, _ ->
+                val count = snapshots?.size() ?: 0
+                _binding?.tvNotifBadge?.let { badge ->
+                    if (count > 0) {
+                        badge.visibility = View.VISIBLE
+                        badge.text = if (count > 9) "9+" else count.toString()
+                    } else {
+                        badge.visibility = View.GONE
                     }
                 }
             }

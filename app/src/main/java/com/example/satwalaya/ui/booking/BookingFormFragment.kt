@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.satwalaya.R
 import com.example.satwalaya.data.model.Pet
 import com.example.satwalaya.data.repository.PetRepository
@@ -25,23 +27,20 @@ class BookingFormFragment : Fragment() {
     private val petRepository = PetRepository()
     private lateinit var sessionManager: SessionManager
 
-    // Data dari BookingFragment
     private var serviceName = ""
     private var basePrice = 0
     private var isHotel = false
     private var sizesPriceMap = mutableMapOf<String, Int>()
 
-    // Grooming add-on prices
     private val groomFreshPrices = mapOf("Kecil" to 40000, "Sedang" to 55000, "Besar" to 70000)
     private val groomFullPrices = mapOf("Kecil" to 85000, "Sedang" to 100000, "Besar" to 120000)
 
-    // State
     private val selectedPets = mutableListOf<Pet>()
     private var allPets = listOf<Pet>()
     private var checkInDate: Calendar? = null
     private var checkOutDate: Calendar? = null
     private var addGrooming = false
-    private var groomingType = "fresh" // "fresh" or "full"
+    private var groomingType = "fresh"
 
     private val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id"))
 
@@ -54,7 +53,6 @@ class BookingFormFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        // Parse data dari BookingFragment
         arguments?.let {
             serviceName = it.getString("serviceName", "")
             basePrice = it.getInt("servicePrice", 0)
@@ -64,7 +62,6 @@ class BookingFormFragment : Fragment() {
 
         isHotel = serviceName.contains("Hotel", ignoreCase = true)
 
-        // Setup banner
         binding.tvBannerName.text = serviceName
         if (isHotel) {
             binding.tvBannerPrice.text = "Mulai ${formatPrice(basePrice)}/malam"
@@ -78,7 +75,6 @@ class BookingFormFragment : Fragment() {
             binding.tvBannerPrice.setTextColor(resources.getColor(R.color.purple_primary, null))
         }
 
-        // Show/hide sections based on service type
         if (isHotel) {
             binding.addonSection.visibility = View.VISIBLE
             binding.cardCheckOut.visibility = View.VISIBLE
@@ -89,12 +85,9 @@ class BookingFormFragment : Fragment() {
             binding.tvCheckInLabel.text = "Tanggal appointment"
         }
 
-        // Owner name auto-fill
         binding.tvOwnerName.text = sessionManager.getUsername().ifEmpty { "Pemilik Hewan" }
 
-        // Setup listeners
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
-
         binding.btnAddPetFromBooking.setOnClickListener {
             findNavController().navigate(R.id.addPetFragment)
         }
@@ -129,8 +122,6 @@ class BookingFormFragment : Fragment() {
         return sizesPriceMap[size] ?: basePrice
     }
 
-    // ===== LOAD & DISPLAY PETS =====
-
     private fun loadPets() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         petRepository.getPets(userId,
@@ -161,7 +152,8 @@ class BookingFormFragment : Fragment() {
             val card = LayoutInflater.from(requireContext())
                 .inflate(R.layout.item_pet_card, binding.petListContainer, false)
 
-            val tvIcon = card.findViewById<TextView>(R.id.tvPetIcon)
+            // ← DIGANTI: pakai ImageView bukan TextView
+            val ivPhoto = card.findViewById<ImageView>(R.id.ivPetPhoto)
             val tvName = card.findViewById<TextView>(R.id.tvPetName)
             val tvDetail = card.findViewById<TextView>(R.id.tvPetDetail)
             val tvWeight = card.findViewById<TextView>(R.id.tvPetWeight)
@@ -171,18 +163,23 @@ class BookingFormFragment : Fragment() {
 
             val size = getSizeCategory(pet.weight)
 
-            tvIcon.text = when (pet.type) {
-                "Kucing" -> "🐱"
-                "Anjing" -> "🐶"
-                "Kelinci" -> "🐰"
-                else -> "🐾"
+            // Load foto atau tampilkan emoji sebagai fallback
+            if (pet.photoUrl.isNotEmpty()) {
+                Glide.with(this)
+                    .load(pet.photoUrl)
+                    .circleCrop()
+                    .placeholder(R.drawable.bg_pet_icon)
+                    .into(ivPhoto)
+            } else {
+                // Kalau tidak ada foto, tampilkan background sesuai tipe
+                ivPhoto.setImageResource(R.drawable.bg_pet_icon)
             }
+
             tvName.text = pet.name
             tvDetail.text = "${pet.type} ${pet.breed}, ${pet.age}"
             tvWeight.text = "${pet.weight} kg"
             tvVaccine.text = "Ukuran: $size"
 
-            // Selection state
             val isSelected = selectedPets.any { it.id == pet.id }
             updateCardSelection(card, isSelected)
 
@@ -218,8 +215,6 @@ class BookingFormFragment : Fragment() {
         }
     }
 
-    // ===== DATE PICKERS =====
-
     private fun setupDatePickers() {
         binding.cardCheckIn.setOnClickListener {
             showDatePicker { date ->
@@ -227,7 +222,6 @@ class BookingFormFragment : Fragment() {
                 binding.tvCheckInDate.text = dateFormat.format(date.time)
                 binding.tvCheckInDate.setTextColor(resources.getColor(R.color.text_primary, null))
 
-                // Auto-set checkout to next day for hotel
                 if (isHotel && checkOutDate == null) {
                     checkOutDate = (date.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
                     binding.tvCheckOutDate.text = dateFormat.format(checkOutDate!!.time)
@@ -263,8 +257,6 @@ class BookingFormFragment : Fragment() {
         }
     }
 
-    // ===== ADD-ON GROOMING =====
-
     private fun setupAddonSection() {
         binding.cbAddGrooming.setOnCheckedChangeListener { _, isChecked ->
             addGrooming = isChecked
@@ -280,8 +272,6 @@ class BookingFormFragment : Fragment() {
             calculatePrice()
         }
     }
-
-    // ===== PRICE CALCULATION =====
 
     private fun calculatePrice() {
         binding.priceBreakdown.removeAllViews()
@@ -324,7 +314,6 @@ class BookingFormFragment : Fragment() {
                 total += price
             }
 
-            // Add grooming cost
             if (addGrooming && isHotel) {
                 val groomPrices = if (groomingType == "fresh") groomFreshPrices else groomFullPrices
                 val groomPrice = groomPrices[size] ?: 0
@@ -361,8 +350,6 @@ class BookingFormFragment : Fragment() {
         binding.priceBreakdown.addView(row)
     }
 
-    // ===== SUBMIT =====
-
     private fun submitBooking() {
         if (selectedPets.isEmpty()) {
             Toast.makeText(requireContext(), "Pilih minimal 1 hewan", Toast.LENGTH_SHORT).show()
@@ -382,7 +369,6 @@ class BookingFormFragment : Fragment() {
             return
         }
 
-        // Collect data and navigate to review/payment
         val petNames = selectedPets.joinToString(", ") { it.name }
         val totalPrice = calculateTotalPrice()
 
@@ -427,7 +413,6 @@ class BookingFormFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Reload pets in case user added one from this screen
         loadPets()
     }
 

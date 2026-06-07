@@ -43,6 +43,48 @@
         android:textColor="@color/text_primary"
         android:textSize="13sp" />
 
+    <!-- Tambah Foto -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Foto (opsional)"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:id="@+id/btnAddPhoto"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:background="@drawable/bg_input_field">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="📷"
+                android:textSize="24sp" />
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/ivPhotoPreview"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_input_field"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="Preview foto" />
+
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -50,4 +92,5 @@
         android:text="Review kamu membantu pet owner lain dalam memilih layanan"
         android:textColor="@color/text_secondary"
         android:textSize="11sp" />
+
 </LinearLayout>
