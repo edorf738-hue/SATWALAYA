@@ -1,10 +1,13 @@
 package com.example.satwalaya.ui.history
 
+import android.app.Dialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -60,12 +63,23 @@ class DailyUpdatesFragment : Fragment() {
                     binding.rvUpdates.visibility = View.VISIBLE
 
                     val updates = result.documents.map { doc ->
+                        // Support data lama (photoUrl) dan data baru (mediaUrls)
+                        val mediaUrls = doc.get("mediaUrls") as? List<*>
+                        val photoUrl = doc.getString("photoUrl") ?: ""
+
+                        val urls: List<String> = when {
+                            mediaUrls != null && mediaUrls.isNotEmpty() ->
+                                mediaUrls.mapNotNull { it?.toString() }
+                            photoUrl.isNotEmpty() -> listOf(photoUrl)
+                            else -> emptyList()
+                        }
+
                         mapOf(
                             "date" to (doc.getString("date") ?: ""),
                             "dayCount" to (doc.getString("dayCount") ?: ""),
-                            "photoUrl" to (doc.getString("photoUrl") ?: ""),
                             "notes" to (doc.getString("notes") ?: ""),
-                            "staffName" to (doc.getString("staffName") ?: "")
+                            "staffName" to (doc.getString("staffName") ?: ""),
+                            "urls" to urls
                         )
                     }
 
@@ -79,16 +93,15 @@ class DailyUpdatesFragment : Fragment() {
             }
     }
 
-    // Adapter langsung di sini biar simpel
     inner class UpdatesAdapter(
-        private val updates: List<Map<String, String>>
+        private val updates: List<Map<String, Any>>
     ) : RecyclerView.Adapter<UpdatesAdapter.ViewHolder>() {
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvDate: TextView = view.findViewById(R.id.tvDate)
             val tvDayCount: TextView = view.findViewById(R.id.tvDayCount)
-            val cardPhoto: androidx.cardview.widget.CardView = view.findViewById(R.id.cardPhoto)
-            val ivPhoto: ImageView = view.findViewById(R.id.ivPhoto)
+            val scrollPhotos: android.widget.HorizontalScrollView = view.findViewById(R.id.scrollPhotos)
+            val photosContainer: LinearLayout = view.findViewById(R.id.photosContainer)
             val tvNotes: TextView = view.findViewById(R.id.tvNotes)
             val tvStaff: TextView = view.findViewById(R.id.tvStaff)
         }
@@ -103,42 +116,69 @@ class DailyUpdatesFragment : Fragment() {
             val update = updates[position]
 
             holder.tvDate.text = "📅 ${update["date"]}"
-            holder.tvDayCount.text = update["dayCount"]
-            holder.tvNotes.text = update["notes"]
+            holder.tvDayCount.text = update["dayCount"] as? String ?: ""
+            holder.tvNotes.text = update["notes"] as? String ?: ""
             holder.tvStaff.text = "— ${update["staffName"]}"
 
-            val photoUrl = update["photoUrl"] ?: ""
-            if (photoUrl.isNotEmpty()) {
-                holder.cardPhoto.visibility = View.VISIBLE
-                Glide.with(holder.itemView.context)
-                    .load(photoUrl)
-                    .centerCrop()
-                    .into(holder.ivPhoto)
-                holder.ivPhoto.setOnClickListener {
-                    val dialog = android.app.Dialog(holder.itemView.context)
-                    dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
-                    val imageView = android.widget.ImageView(holder.itemView.context)
-                    imageView.layoutParams = android.view.ViewGroup.LayoutParams(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    imageView.scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
-                    imageView.setBackgroundColor(android.graphics.Color.BLACK)
-                    Glide.with(holder.itemView.context).load(photoUrl).into(imageView)
-                    imageView.setOnClickListener { dialog.dismiss() }
-                    dialog.setContentView(imageView)
-                    dialog.window?.setLayout(
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    dialog.show()
+            @Suppress("UNCHECKED_CAST")
+            val urls = update["urls"] as? List<String> ?: emptyList()
+
+            holder.photosContainer.removeAllViews()
+
+            if (urls.isNotEmpty()) {
+                holder.scrollPhotos.visibility = View.VISIBLE
+
+                urls.forEach { url ->
+                    val size = (180 * resources.displayMetrics.density).toInt()
+                    val margin = (8 * resources.displayMetrics.density).toInt()
+
+                    val iv = ImageView(requireContext()).apply {
+                        layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                            marginEnd = margin
+                        }
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        setBackgroundResource(R.drawable.bg_input_field)
+                        clipToOutline = true
+                    }
+
+                    Glide.with(requireContext())
+                        .load(url)
+                        .centerCrop()
+                        .into(iv)
+
+                    iv.setOnClickListener {
+                        showFullscreenPhoto(url)
+                    }
+
+                    holder.photosContainer.addView(iv)
                 }
             } else {
-                holder.cardPhoto.visibility = View.GONE
+                holder.scrollPhotos.visibility = View.GONE
             }
         }
 
         override fun getItemCount() = updates.size
+
+        private fun showFullscreenPhoto(url: String) {
+            val dialog = Dialog(requireContext())
+            dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+            val imageView = ImageView(requireContext()).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                setBackgroundColor(Color.BLACK)
+            }
+            Glide.with(requireContext()).load(url).into(imageView)
+            imageView.setOnClickListener { dialog.dismiss() }
+            dialog.setContentView(imageView)
+            dialog.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            dialog.show()
+        }
     }
 
     override fun onDestroyView() {

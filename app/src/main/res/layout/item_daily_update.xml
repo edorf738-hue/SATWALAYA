@@ -42,25 +42,23 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Photo dengan CardView biar rounded -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardPhoto"
+        <!-- Photos horizontal scroll -->
+        <HorizontalScrollView
+            android:id="@+id/scrollPhotos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:visibility="gone"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/bg_screen">
+            android:scrollbars="none">
 
-            <ImageView
-                android:id="@+id/ivPhoto"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="Foto update harian" />
+            <LinearLayout
+                android:id="@+id/photosContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:spacing="8dp" />
 
-        </androidx.cardview.widget.CardView>
+        </HorizontalScrollView>
 
         <!-- Notes -->
         <TextView
