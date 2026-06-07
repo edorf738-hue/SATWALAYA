@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.satwalaya.databinding.FragmentHelpSupportBinding
 import com.example.satwalaya.ui.BaseFragment
+import androidx.navigation.fragment.findNavController
+import com.example.satwalaya.R
 
 class HelpSupportFragment : BaseFragment() {
     private var _binding: FragmentHelpSupportBinding? = null
@@ -38,7 +40,7 @@ class HelpSupportFragment : BaseFragment() {
         }
 
         binding.btnFaq.setOnClickListener {
-            Toast.makeText(requireContext(), "FAQ feature coming soon!", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_helpSupport_to_faq)
         }
     }
 
