@@ -13,6 +13,7 @@ import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentProfileBinding
 import com.example.satwalaya.ui.auth.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.bumptech.glide.Glide
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -55,10 +56,21 @@ class ProfileFragment : Fragment() {
 
     private fun updateUI() {
         val user = FirebaseAuth.getInstance().currentUser
-        binding.tvProfileName.text = user?.displayName?.ifEmpty { sessionManager.getUsername() } ?: sessionManager.getUsername().ifEmpty { "Pet Owner" }
-        binding.tvProfileEmail.text = user?.email ?: sessionManager.getEmail().ifEmpty { "user@satwalaya.com" }
-    }
+        binding.tvProfileName.text = user?.displayName?.ifEmpty { sessionManager.getUsername() }
+            ?: sessionManager.getUsername().ifEmpty { "Pet Owner" }
+        binding.tvProfileEmail.text = user?.email
+            ?: sessionManager.getEmail().ifEmpty { "user@satwalaya.com" }
 
+        // Load foto profil
+        val photoUrl = sessionManager.getPhotoUrl()
+        if (photoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(photoUrl)
+                .circleCrop()
+                .placeholder(R.drawable.bg_pet_icon)
+                .into(binding.ivProfileAvatar)
+        }
+    }
     private fun showChangePasswordDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Ubah Kata Sandi")

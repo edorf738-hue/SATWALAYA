@@ -21,14 +21,13 @@
             android:paddingTop="48dp"
             android:paddingBottom="20dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/ivProfileAvatar"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:background="@drawable/bg_pet_icon"
-                android:gravity="center"
-                android:text="🐾"
-                android:textSize="32sp" />
+                android:scaleType="centerCrop"
+                android:contentDescription="Foto Profil" />
 
             <TextView
                 android:id="@+id/tvProfileName"
