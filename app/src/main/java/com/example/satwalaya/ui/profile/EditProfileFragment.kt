@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentEditProfileBinding
+import com.example.satwalaya.ui.BaseFragment
 
-class EditProfileFragment : Fragment() {
+class EditProfileFragment : BaseFragment() {
     private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
@@ -24,7 +24,6 @@ class EditProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        // Pre-fill fields from SessionManager
         binding.etEditName.setText(sessionManager.getUsername())
         binding.etEditEmail.setText(sessionManager.getEmail())
         binding.etEditPhone.setText(sessionManager.getPhone())
@@ -35,9 +34,7 @@ class EditProfileFragment : Fragment() {
             val phone = binding.etEditPhone.text.toString()
 
             if (name.isNotEmpty() && email.isNotEmpty()) {
-                // Simpan Sesi Pemilik
                 sessionManager.saveLoginSession(name, email, phone)
-
                 Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
                 findNavController().popBackStack()
             } else {
