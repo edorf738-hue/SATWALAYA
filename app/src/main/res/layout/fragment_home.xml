@@ -73,14 +73,15 @@
                 android:orientation="horizontal"
                 android:padding="14dp">
 
-                <!-- Pet Icon -->
-                <TextView
+                <!-- Pet Photo ← DIGANTI dari TextView ke ImageView -->
+                <ImageView
+                    android:id="@+id/ivPetPhoto"
                     android:layout_width="52dp"
                     android:layout_height="52dp"
                     android:background="@drawable/bg_pet_icon"
-                    android:gravity="center"
-                    android:text="🐱"
-                    android:textSize="24sp" />
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_pet_icon"
+                    android:contentDescription="Foto hewan" />
 
                 <!-- Pet Info -->
                 <LinearLayout
@@ -387,7 +388,6 @@
                 android:orientation="vertical"
                 android:padding="14dp">
 
-                <!-- Review Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -437,7 +437,6 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Review Text -->
                 <TextView
                     android:id="@+id/tvReviewText"
                     android:layout_width="wrap_content"
@@ -448,7 +447,6 @@
                     android:textSize="12sp"
                     android:lineSpacingMultiplier="1.4" />
 
-                <!-- Review Photos -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

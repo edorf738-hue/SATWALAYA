@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.example.satwalaya.R
 import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentHomeBinding
@@ -30,7 +31,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        // Setup observers — Fragment cuma "dengerin" perubahan data
         viewModel.userName.observe(viewLifecycleOwner) { name ->
             binding.tvWelcomeName.text = "Halo, $name!"
         }
@@ -39,7 +39,6 @@ class HomeFragment : Fragment() {
             binding.tvActiveCount.text = count.toString()
         }
 
-        // Load data
         loadData()
         loadReviews()
         loadPets()
@@ -71,11 +70,6 @@ class HomeFragment : Fragment() {
         binding.btnAddPet.setOnClickListener {
             findNavController().navigate(R.id.action_nav_home_to_editProfileFragment)
         }
-
-        // TODO: Notifikasi — aktifkan setelah halaman notifikasi dibuat
-        // binding.btnNotification.setOnClickListener {
-        //     findNavController().navigate(R.id.nav_notifications)
-        // }
     }
 
     private fun loadData() {
@@ -87,7 +81,6 @@ class HomeFragment : Fragment() {
     private fun loadReviews() {
         val db = FirebaseFirestore.getInstance()
 
-        // Load rating rata-rata
         db.collection("reviews").get()
             .addOnSuccessListener { docs ->
                 if (!docs.isEmpty) {
@@ -96,7 +89,6 @@ class HomeFragment : Fragment() {
                 }
             }
 
-        // Load review terbaru
         db.collection("reviews")
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(1)
@@ -132,9 +124,17 @@ class HomeFragment : Fragment() {
                     val name = pet.getString("name") ?: "Hewan kamu"
                     val type = pet.getString("type") ?: ""
                     val breed = pet.getString("breed") ?: ""
+                    val photoUrl = pet.getString("photoUrl") ?: ""
                     _binding?.let {
                         it.tvPetName.text = name
                         it.tvPetDetail.text = "$type • $breed"
+                        if (photoUrl.isNotEmpty()) {
+                            Glide.with(this)
+                                .load(photoUrl)
+                                .circleCrop()
+                                .placeholder(R.drawable.bg_pet_icon)
+                                .into(it.ivPetPhoto)
+                        }
                     }
                 }
             }

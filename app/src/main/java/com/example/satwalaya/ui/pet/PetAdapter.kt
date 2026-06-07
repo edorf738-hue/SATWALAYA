@@ -3,8 +3,10 @@ package com.example.satwalaya.ui.pet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.satwalaya.R
 import com.example.satwalaya.data.model.Pet
 
@@ -14,7 +16,7 @@ class PetAdapter(
 ) : RecyclerView.Adapter<PetAdapter.PetViewHolder>() {
 
     class PetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvPetIcon: TextView = view.findViewById(R.id.tvPetIcon)
+        val ivPetPhoto: ImageView = view.findViewById(R.id.ivPetPhoto) // ← DIGANTI
         val tvPetName: TextView = view.findViewById(R.id.tvPetName)
         val tvPetDetail: TextView = view.findViewById(R.id.tvPetDetail)
         val tvPetWeight: TextView = view.findViewById(R.id.tvPetWeight)
@@ -34,11 +36,15 @@ class PetAdapter(
         holder.tvPetDetail.text = "${pet.type} ${pet.breed}, ${pet.age}"
         holder.tvPetWeight.text = "${pet.weight} kg"
 
-        holder.tvPetIcon.text = when (pet.type) {
-            "Kucing" -> "🐱"
-            "Anjing" -> "🐶"
-            "Kelinci" -> "🐰"
-            else -> "🐾"
+        // Load foto atau fallback icon
+        if (pet.photoUrl.isNotEmpty()) {
+            Glide.with(holder.itemView.context)
+                .load(pet.photoUrl)
+                .circleCrop()
+                .placeholder(R.drawable.bg_pet_icon)
+                .into(holder.ivPetPhoto)
+        } else {
+            holder.ivPetPhoto.setImageResource(R.drawable.bg_pet_icon)
         }
 
         holder.tvPetVaccine.text = if (pet.allergy.isEmpty() || pet.allergy == "-") {
