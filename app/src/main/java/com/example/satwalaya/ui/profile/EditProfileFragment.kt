@@ -77,6 +77,7 @@ class EditProfileFragment : BaseFragment() {
                 if (selectedImageUri != null) {
                     uploadPhoto(name, email, phone)
                 } else {
+                    FirebaseAuth.getInstance().currentUser?.updateEmail(email)
                     sessionManager.saveLoginSession(name, email, phone)
                     Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()
@@ -98,6 +99,7 @@ class EditProfileFragment : BaseFragment() {
         storageRef.putFile(selectedImageUri!!)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
+                    FirebaseAuth.getInstance().currentUser?.updateEmail(email)
                     sessionManager.savePhotoUrl(uri.toString())
                     sessionManager.saveLoginSession(name, email, phone)
                     Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()

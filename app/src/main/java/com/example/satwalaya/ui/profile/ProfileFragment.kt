@@ -56,10 +56,14 @@ class ProfileFragment : Fragment() {
 
     private fun updateUI() {
         val user = FirebaseAuth.getInstance().currentUser
-        binding.tvProfileName.text = user?.displayName?.ifEmpty { sessionManager.getUsername() }
-            ?: sessionManager.getUsername().ifEmpty { "Pet Owner" }
-        binding.tvProfileEmail.text = user?.email
-            ?: sessionManager.getEmail().ifEmpty { "user@satwalaya.com" }
+
+        val savedName = sessionManager.getUsername()
+        binding.tvProfileName.text = if (savedName.isNotEmpty()) savedName
+        else user?.displayName?.ifEmpty { "Pet Owner" } ?: "Pet Owner"
+
+        val savedEmail = sessionManager.getEmail()
+        binding.tvProfileEmail.text = if (savedEmail.isNotEmpty()) savedEmail
+        else user?.email ?: "user@satwalaya.com"
 
         // Load foto profil
         val photoUrl = sessionManager.getPhotoUrl()
@@ -76,7 +80,11 @@ class ProfileFragment : Fragment() {
             .setTitle("Ubah Kata Sandi")
             .setMessage("Link ubah kata sandi akan dikirim ke email kamu.")
             .setPositiveButton("Kirim") { _, _ ->
-                val email = FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
+                val email = sessionManager.getEmail().ifEmpty {
+                    FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
+                }
+                android.util.Log.d("DEBUG", "Kirim reset ke email: $email")  // ← tambah di sini
+                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                 FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                 android.widget.Toast.makeText(requireContext(), "Link dikirim ke $email", android.widget.Toast.LENGTH_LONG).show()
             }
