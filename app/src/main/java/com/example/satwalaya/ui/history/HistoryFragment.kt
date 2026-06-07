@@ -8,12 +8,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.satwalaya.R
 import com.example.satwalaya.databinding.FragmentHistoryBinding
@@ -28,16 +26,15 @@ class HistoryFragment : Fragment() {
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
 
-    // Untuk upload foto review
-    private var selectedPhotoUri: Uri? = null
+    private var selectedPhotoUris: MutableList<Uri> = mutableListOf()
     private var currentDialogView: View? = null
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            selectedPhotoUri = result.data?.data
-            selectedPhotoUri?.let { uri ->
+            result.data?.data?.let { uri ->
+                selectedPhotoUris.add(uri)
                 currentDialogView?.let { dialogView ->
                     val ivPreview = dialogView.findViewById<android.widget.ImageView>(R.id.ivPhotoPreview)
                     ivPreview.visibility = View.VISIBLE
@@ -172,8 +169,7 @@ class HistoryFragment : Fragment() {
     }
 
     private fun showReviewDialog(booking: Map<String, Any>) {
-        // Reset state foto setiap kali dialog dibuka
-        selectedPhotoUri = null
+        selectedPhotoUris = mutableListOf()
 
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_review, null)
@@ -210,10 +206,10 @@ class HistoryFragment : Fragment() {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Mengirim..."
 
-                if (selectedPhotoUri != null) {
-                    uploadPhotoAndSaveReview(booking, rating, reviewText, dialog)
+                if (selectedPhotoUris.isNotEmpty()) {
+                    uploadPhotosAndSaveReview(booking, rating, reviewText, dialog)
                 } else {
-                    saveReview(booking, rating, reviewText, photoUrl = null, dialog = dialog)
+                    saveReview(booking, rating, reviewText, photoUrls = emptyList(), dialog = dialog)
                 }
             }
         }
@@ -221,34 +217,43 @@ class HistoryFragment : Fragment() {
         dialog.show()
     }
 
-    private fun uploadPhotoAndSaveReview(
+    private fun uploadPhotosAndSaveReview(
         booking: Map<String, Any>,
         rating: Float,
         reviewText: String,
         dialog: AlertDialog
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        val fileName = "reviews/${userId}_${System.currentTimeMillis()}.jpg"
-        val storageRef = FirebaseStorage.getInstance().reference.child(fileName)
+        val uploadedUrls = mutableListOf<String>()
+        var uploadCount = 0
 
-        storageRef.putFile(selectedPhotoUri!!)
-            .addOnSuccessListener {
-                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    saveReview(booking, rating, reviewText, photoUrl = uri.toString(), dialog = dialog)
+        selectedPhotoUris.forEachIndexed { index, uri ->
+            val fileName = "reviews/${userId}_${System.currentTimeMillis()}_$index.jpg"
+            val storageRef = FirebaseStorage.getInstance().reference.child(fileName)
+
+            storageRef.putFile(uri)
+                .addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        uploadedUrls.add(downloadUri.toString())
+                        uploadCount++
+                        if (uploadCount == selectedPhotoUris.size) {
+                            saveReview(booking, rating, reviewText, photoUrls = uploadedUrls, dialog = dialog)
+                        }
+                    }
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Gagal upload foto", Toast.LENGTH_SHORT).show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Kirim"
-            }
+                .addOnFailureListener {
+                    Toast.makeText(requireContext(), "Gagal upload foto", Toast.LENGTH_SHORT).show()
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Kirim"
+                }
+        }
     }
 
     private fun saveReview(
         booking: Map<String, Any>,
         rating: Float,
         reviewText: String,
-        photoUrl: String?,
+        photoUrls: List<String>,
         dialog: AlertDialog
     ) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -262,12 +267,9 @@ class HistoryFragment : Fragment() {
             "petNames" to (booking["petNames"] as String),
             "rating" to rating,
             "reviewText" to reviewText,
+            "photoUrls" to photoUrls,
             "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
         )
-
-        if (photoUrl != null) {
-            review["photoUrl"] = photoUrl
-        }
 
         db.collection("reviews").add(review)
             .addOnSuccessListener {

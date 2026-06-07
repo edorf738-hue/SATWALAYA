@@ -464,40 +464,21 @@
                     android:textSize="12sp"
                     android:lineSpacingMultiplier="1.4" />
 
-                <LinearLayout
+                <HorizontalScrollView
+                    android:id="@+id/scrollReviewPhotos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
+                    android:scrollbars="none"
+                    android:visibility="gone">
 
-                    <TextView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_marginEnd="6dp"
-                        android:background="@drawable/bg_icon_amber"
-                        android:gravity="center"
-                        android:text="🐱"
-                        android:textSize="24sp" />
+                    <LinearLayout
+                        android:id="@+id/reviewPhotosContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
 
-                    <TextView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:layout_marginEnd="6dp"
-                        android:background="@drawable/bg_icon_green"
-                        android:gravity="center"
-                        android:text="🐱"
-                        android:textSize="24sp" />
-
-                    <TextView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:background="@drawable/bg_pet_icon"
-                        android:gravity="center"
-                        android:text="+3"
-                        android:textColor="@color/purple_primary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                </HorizontalScrollView>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
