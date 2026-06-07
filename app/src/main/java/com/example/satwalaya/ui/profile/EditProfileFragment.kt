@@ -16,6 +16,7 @@ import com.example.satwalaya.databinding.FragmentEditProfileBinding
 import com.example.satwalaya.ui.BaseFragment
 import com.example.satwalaya.utils.SessionManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class EditProfileFragment : BaseFragment() {
@@ -45,7 +46,6 @@ class EditProfileFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        // Load foto yang sudah ada
         val photoUrl = sessionManager.getPhotoUrl()
         if (photoUrl.isNotEmpty()) {
             Glide.with(this)
@@ -55,12 +55,10 @@ class EditProfileFragment : BaseFragment() {
                 .into(binding.ivEditAvatar)
         }
 
-        // Pre-fill fields
         binding.etEditName.setText(sessionManager.getUsername())
         binding.etEditEmail.setText(sessionManager.getEmail())
         binding.etEditPhone.setText(sessionManager.getPhone())
 
-        // Pilih foto
         binding.tvChangePhoto.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK).apply {
                 type = "image/*"
@@ -99,9 +97,16 @@ class EditProfileFragment : BaseFragment() {
         storageRef.putFile(selectedImageUri!!)
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
-                    FirebaseAuth.getInstance().currentUser?.updateEmail(email)
-                    sessionManager.savePhotoUrl(uri.toString())
+                    val photoUrl = uri.toString()
+                    sessionManager.savePhotoUrl(photoUrl)
                     sessionManager.saveLoginSession(name, email, phone)
+
+                    // Simpan photoUrl ke Firestore
+                    FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(userId)
+                        .update("photoUrl", photoUrl)
+
                     Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
                     findNavController().popBackStack()
                 }
