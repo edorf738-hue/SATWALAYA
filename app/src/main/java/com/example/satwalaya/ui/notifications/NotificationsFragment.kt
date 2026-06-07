@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentNotificationsBinding
 import com.example.satwalaya.ui.BaseFragment
+import com.example.satwalaya.utils.NotificationHelper
 
 
 class NotificationsFragment : BaseFragment() {
@@ -32,10 +33,12 @@ class NotificationsFragment : BaseFragment() {
         // Save on change
         binding.switchBooking.setOnCheckedChangeListener { _, isChecked ->
             sessionManager.setBookingNotif(isChecked)
+            if (isChecked) {
+                NotificationHelper.sendBookingNotif(requireContext(), "Pembaruan booking diaktifkan!")
+        }
             val status = if (isChecked) "diaktifkan" else "dimatikan"
             Toast.makeText(requireContext(), "Pembaruan booking $status", Toast.LENGTH_SHORT).show()
         }
-
         binding.switchPromo.setOnCheckedChangeListener { _, isChecked ->
             sessionManager.setPromoNotif(isChecked)
             val status = if (isChecked) "diaktifkan" else "dimatikan"

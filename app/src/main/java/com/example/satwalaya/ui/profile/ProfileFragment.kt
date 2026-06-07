@@ -95,7 +95,12 @@ class ProfileFragment : Fragment() {
     private fun showAboutDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Tentang Satwalaya")
-            .setMessage("Satwalaya v1.0.0\n\nAplikasi pet hotel dan grooming terpercaya untuk anabul kesayangan kamu.")
+            .setMessage(
+                "Satwalaya v1.0.0\n\n" +
+                        "Aplikasi pet hotel dan grooming terpercaya untuk anabul kesayangan kamu.\n\n" +
+                        "Dikembangkan oleh Tim Satwalaya\n" +
+                        "© 2026 Satwalaya. All rights reserved."
+            )
             .setPositiveButton("OK", null)
             .show()
     }

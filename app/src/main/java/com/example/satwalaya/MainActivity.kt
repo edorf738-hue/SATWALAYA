@@ -7,6 +7,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.satwalaya.databinding.ActivityMainBinding
 import com.example.satwalaya.utils.SessionManager
+import com.example.satwalaya.utils.NotificationHelper
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -17,7 +18,8 @@ class MainActivity : AppCompatActivity() {
         
         sessionManager = SessionManager(this)
         applyTheme()
-        
+        NotificationHelper.createChannels(this)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
