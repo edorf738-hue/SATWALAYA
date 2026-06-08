@@ -1,11 +1,35 @@
 package com.example.satwalaya.data.repository
 
+import android.net.Uri
 import com.example.satwalaya.data.model.Pet
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class PetRepository {
 
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
+    fun savePetWithPhoto(
+        pet: Pet,
+        photoUri: Uri?,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (photoUri != null) {
+            val fileName = "pets/${pet.userId}_${System.currentTimeMillis()}.jpg"
+            val ref = storage.reference.child(fileName)
+            ref.putFile(photoUri)
+                .addOnSuccessListener {
+                    ref.downloadUrl.addOnSuccessListener { url ->
+                        savePet(pet.copy(photoUrl = url.toString()), onSuccess, onFailure)
+                    }
+                }
+                .addOnFailureListener { e -> onFailure(e) }
+        } else {
+            savePet(pet, onSuccess, onFailure)
+        }
+    }
 
     fun savePet(
         pet: Pet,
@@ -21,7 +45,8 @@ class PetRepository {
             "weight" to pet.weight,
             "allergy" to pet.allergy,
             "feedSchedule" to pet.feedSchedule,
-            "feedType" to pet.feedType
+            "feedType" to pet.feedType,
+            "photoUrl" to pet.photoUrl
         )
 
         if (pet.id.isEmpty()) {
@@ -55,7 +80,8 @@ class PetRepository {
                         weight = doc.getString("weight") ?: "",
                         allergy = doc.getString("allergy") ?: "",
                         feedSchedule = doc.getString("feedSchedule") ?: "",
-                        feedType = doc.getString("feedType") ?: ""
+                        feedType = doc.getString("feedType") ?: "",
+                        photoUrl = doc.getString("photoUrl") ?: ""
                     )
                 }
                 onSuccess(pets)
