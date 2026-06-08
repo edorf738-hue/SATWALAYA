@@ -100,7 +100,17 @@
     <fragment
         android:id="@+id/helpSupportFragment"
         android:name="com.example.satwalaya.ui.settings.HelpSupportFragment"
-        android:label="Bantuan &amp; Dukungan" />
+        android:label="Bantuan &amp; Dukungan">
+        <action
+            android:id="@+id/action_helpSupport_to_faq"
+            app:destination="@id/faqFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/faqFragment"
+        android:name="com.example.satwalaya.ui.settings.FaqFragment"
+        android:label="FAQ"
+        tools:layout="@layout/fragment_faq" />
 
     <fragment
         android:id="@+id/editProfileFragment"

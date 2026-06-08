@@ -13,6 +13,7 @@ import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentProfileBinding
 import com.example.satwalaya.ui.auth.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.bumptech.glide.Glide
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -55,16 +56,35 @@ class ProfileFragment : Fragment() {
 
     private fun updateUI() {
         val user = FirebaseAuth.getInstance().currentUser
-        binding.tvProfileName.text = user?.displayName?.ifEmpty { sessionManager.getUsername() } ?: sessionManager.getUsername().ifEmpty { "Pet Owner" }
-        binding.tvProfileEmail.text = user?.email ?: sessionManager.getEmail().ifEmpty { "user@satwalaya.com" }
-    }
 
+        val savedName = sessionManager.getUsername()
+        binding.tvProfileName.text = if (savedName.isNotEmpty()) savedName
+        else user?.displayName?.ifEmpty { "Pet Owner" } ?: "Pet Owner"
+
+        val savedEmail = sessionManager.getEmail()
+        binding.tvProfileEmail.text = if (savedEmail.isNotEmpty()) savedEmail
+        else user?.email ?: "user@satwalaya.com"
+
+        // Load foto profil
+        val photoUrl = sessionManager.getPhotoUrl()
+        if (photoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(photoUrl)
+                .circleCrop()
+                .placeholder(R.drawable.bg_pet_icon)
+                .into(binding.ivProfileAvatar)
+        }
+    }
     private fun showChangePasswordDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Ubah Kata Sandi")
             .setMessage("Link ubah kata sandi akan dikirim ke email kamu.")
             .setPositiveButton("Kirim") { _, _ ->
-                val email = FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
+                val email = sessionManager.getEmail().ifEmpty {
+                    FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
+                }
+                android.util.Log.d("DEBUG", "Kirim reset ke email: $email")  // ← tambah di sini
+                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                 FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                 android.widget.Toast.makeText(requireContext(), "Link dikirim ke $email", android.widget.Toast.LENGTH_LONG).show()
             }
@@ -75,7 +95,12 @@ class ProfileFragment : Fragment() {
     private fun showAboutDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Tentang Satwalaya")
-            .setMessage("Satwalaya v1.0.0\n\nAplikasi pet hotel dan grooming terpercaya untuk anabul kesayangan kamu.")
+            .setMessage(
+                "Satwalaya v1.0.0\n\n" +
+                        "Aplikasi pet hotel dan grooming terpercaya untuk anabul kesayangan kamu.\n\n" +
+                        "Dikembangkan oleh Tim Satwalaya\n" +
+                        "© 2026 Satwalaya. All rights reserved."
+            )
             .setPositiveButton("OK", null)
             .show()
     }

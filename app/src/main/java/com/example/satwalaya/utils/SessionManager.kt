@@ -29,6 +29,7 @@ class SessionManager(context: Context) {
         private const val KEY_NOTIF_BOOKING = "notifBooking"
         private const val KEY_NOTIF_PROMO = "notifPromo"
         private const val KEY_NOTIF_HEALTH = "notifHealth"
+        private const val KEY_PHOTO_URL = "photoUrl"
 
         // Privacy settings
         private const val KEY_2FA = "twoFactorEnabled"
@@ -77,6 +78,12 @@ class SessionManager(context: Context) {
         editor.putBoolean(KEY_DARK_MODE, isEnabled)
         editor.apply()
     }
+
+    fun savePhotoUrl(url: String) {
+        editor.putString(KEY_PHOTO_URL, url)
+        editor.apply()
+    }
+    fun getPhotoUrl(): String = pref.getString(KEY_PHOTO_URL, "") ?: ""
     fun isDarkMode(): Boolean = pref.getBoolean(KEY_DARK_MODE, false)
 
     // Notification toggles
