@@ -33,6 +33,8 @@ class EditProfileFragment : BaseFragment() {
             Glide.with(this)
                 .load(selectedImageUri)
                 .circleCrop()
+                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .into(binding.ivEditAvatar)
         }
     }
@@ -51,6 +53,8 @@ class EditProfileFragment : BaseFragment() {
             Glide.with(this)
                 .load(photoUrl)
                 .circleCrop()
+                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.bg_pet_icon)
                 .into(binding.ivEditAvatar)
         }
@@ -125,6 +129,18 @@ class EditProfileFragment : BaseFragment() {
                         .addOnSuccessListener {
                             sessionManager.savePhotoUrl(photoUrl)
                             sessionManager.saveLoginSession(name, email, phone)
+
+                            // Sync foto baru ke semua review milik user ini
+                            FirebaseFirestore.getInstance()
+                                .collection("reviews")
+                                .whereEqualTo("userId", userId)
+                                .get()
+                                .addOnSuccessListener { snap ->
+                                    snap.documents.forEach { doc ->
+                                        doc.reference.update("userPhotoUrl", photoUrl)
+                                    }
+                                }
+
                             Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
                             findNavController().popBackStack()
                         }

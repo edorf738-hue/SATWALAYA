@@ -92,6 +92,8 @@ class ProfileFragment : Fragment() {
             Glide.with(this)
                 .load(photoUrl)
                 .circleCrop()
+                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
                 .placeholder(R.drawable.bg_pet_icon)
                 .into(binding.ivProfileAvatar)
             binding.ivProfileAvatar.setOnClickListener { showFullscreenPhoto(photoUrl) }

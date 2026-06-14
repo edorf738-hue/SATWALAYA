@@ -78,18 +78,30 @@ class LoginActivity : AppCompatActivity() {
                         val email = firebaseResult.user?.email ?: ""
                         val uid   = firebaseResult.user?.uid ?: ""
 
-                        // Tambah ini — buat dokumen user di Firestore kalau belum ada
-                        com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                            .collection("users")
-                            .document(uid)
-                            .set(mapOf(
-                                "name" to name,
-                                "email" to email,
-                                "loginMethod" to "google"
-                            ), com.google.firebase.firestore.SetOptions.merge())
-
-                        sessionManager.saveLoginSession(username = name, email = email)
-                        navigateToMain()
+                        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        db.collection("users").document(uid).get()
+                            .addOnSuccessListener { docSnap ->
+                                if (docSnap.exists()) {
+                                    // Dokumen sudah ada — pakai nama dari Firestore, jangan overwrite
+                                    val existingName = docSnap.getString("name") ?: name
+                                    sessionManager.saveLoginSession(username = existingName, email = email)
+                                } else {
+                                    // Dokumen belum ada — buat baru dengan nama Google
+                                    db.collection("users").document(uid)
+                                        .set(mapOf(
+                                            "name" to name,
+                                            "email" to email,
+                                            "loginMethod" to "google"
+                                        ))
+                                    sessionManager.saveLoginSession(username = name, email = email)
+                                }
+                                navigateToMain()
+                            }
+                            .addOnFailureListener {
+                                // Kalau gagal get, fallback pakai nama Google
+                                sessionManager.saveLoginSession(username = name, email = email)
+                                navigateToMain()
+                            }
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "Login Google gagal: ${e.message}", Toast.LENGTH_SHORT).show()
