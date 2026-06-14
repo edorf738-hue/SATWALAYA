@@ -22,23 +22,6 @@ class RegisterActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         binding.btnRegister.setOnClickListener {
-            val name = binding.etFullName.text.toString()
-            val email = binding.etEmail.text.toString()
-            val phone = binding.etPhone.text.toString()
-            val password = binding.etPassword.text.toString()
-
-            if (name.isNotEmpty() && email.isNotEmpty() && phone.isNotEmpty() && password.isNotEmpty()) {
-                sessionManager.saveLoginSession(name, email, phone)
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-            } else {
-                Toast.makeText(this, "Semua bidang wajib diisi", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.btnRegister.setOnClickListener {
             val name = binding.etFullName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val phone = binding.etPhone.text.toString().trim()
@@ -60,6 +43,18 @@ class RegisterActivity : AppCompatActivity() {
                         .setDisplayName(name)
                         .build()
                     result.user?.updateProfile(profileUpdates)
+
+                    // Tambah ini — buat dokumen user di Firestore
+                    val userId = result.user?.uid ?: ""
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(userId)
+                        .set(mapOf(
+                            "name" to name,
+                            "email" to email,
+                            "phone" to phone,
+                            "loginMethod" to "email"
+                        ))
 
                     sessionManager.saveLoginSession(name, email, phone)
 

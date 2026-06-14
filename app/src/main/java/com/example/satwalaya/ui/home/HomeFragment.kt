@@ -16,13 +16,18 @@ import com.example.satwalaya.ui.booking.BookingFragment
 import com.example.satwalaya.utils.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import android.widget.TextView
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val viewModel: HomeViewModel by viewModels()
+    private var petsListener: ListenerRegistration? = null
+    private var userListener: ListenerRegistration? = null
+    private var notifBadgeListener: ListenerRegistration? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
@@ -81,14 +86,24 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadData() {
-        viewModel.setUserName(sessionManager.getUsername())
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        viewModel.setUserName(sessionManager.getUsername().ifEmpty { "Pet Owner" })
         viewModel.loadActiveBookings(userId)
+        userListener = FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(userId)
+            .addSnapshotListener { doc, _ ->
+                if (_binding == null) return@addSnapshotListener
+                val name = doc?.getString("name")?.ifEmpty { null }
+                    ?: sessionManager.getUsername().ifEmpty { "Pet Owner" }
+                viewModel.setUserName(name)
+            }
     }
 
     private fun loadReviews() {
         val db = FirebaseFirestore.getInstance()
 
+        // Hitung rata-rata rating
         db.collection("reviews").get()
             .addOnSuccessListener { docs ->
                 if (!docs.isEmpty) {
@@ -97,70 +112,138 @@ class HomeFragment : Fragment() {
                 }
             }
 
+        // Load max 3 review terbaru
         db.collection("reviews")
             .orderBy("createdAt", Query.Direction.DESCENDING)
-            .limit(1)
+            .limit(3)
             .get()
             .addOnSuccessListener { documents ->
                 if (_binding == null) return@addOnSuccessListener
-                if (!documents.isEmpty) {
-                    val review = documents.first()
-                    val name = review.getString("userName") ?: "Pengguna"
-                    val comment = review.getString("reviewText") ?: ""
-                    val rating = (review.getDouble("rating") ?: 5.0).toInt()
-                    val stars = "⭐".repeat(rating)
+                if (documents.isEmpty) return@addOnSuccessListener
 
-                    _binding?.let { b ->
-                        b.tvReviewerName.text = name
-                        b.tvReviewText.text = comment
-                        b.tvReviewStars.text = stars
-                        b.tvReviewTime.text = "Baru saja"
+                val reviews: List<Map<String, Any?>> = documents.map { doc ->
+                    mapOf(
+                        "userName" to (doc.getString("userName") ?: "Pengguna"),
+                        "userPhotoUrl" to (doc.getString("userPhotoUrl") ?: ""),
+                        "rating" to (doc.getDouble("rating") ?: 5.0),
+                        "reviewText" to (doc.getString("reviewText") ?: ""),
+                        "serviceName" to (doc.getString("serviceName") ?: ""),
+                        "photoUrls" to ((doc.get("photoUrls") as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList<String>()),
+                        "createdAt" to doc.getTimestamp("createdAt")
+                    )
+                }
 
-                        // Load foto dari photoUrls array
-                        @Suppress("UNCHECKED_CAST")
-                        val photoUrls = review.get("photoUrls") as? List<String> ?: emptyList()
-
-                        if (photoUrls.isNotEmpty()) {
-                            b.scrollReviewPhotos.visibility = View.VISIBLE
-                            b.reviewPhotosContainer.removeAllViews()
-
-                            photoUrls.forEach { url ->
-                                val size = (64 * resources.displayMetrics.density).toInt()
-                                val margin = (6 * resources.displayMetrics.density).toInt()
-
-                                val iv = ImageView(requireContext()).apply {
-                                    layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                                        marginEnd = margin
-                                    }
-                                    scaleType = ImageView.ScaleType.CENTER_CROP
-                                    setBackgroundResource(R.drawable.bg_input_field)
-                                    clipToOutline = true
-                                }
-
-                                Glide.with(requireContext())
-                                    .load(url)
-                                    .centerCrop()
-                                    .into(iv)
-
-                                b.reviewPhotosContainer.addView(iv)
-                            }
-                        } else {
-                            b.scrollReviewPhotos.visibility = View.GONE
-                        }
-                    }
+                _binding?.rvHomeReviews?.apply {
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+                    adapter = HomeReviewAdapter(reviews)
                 }
             }
     }
 
+    inner class HomeReviewAdapter(
+        private val reviews: List<Map<String, Any?>>
+    ) : androidx.recyclerview.widget.RecyclerView.Adapter<HomeReviewAdapter.ViewHolder>() {
+
+        inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+            val ivAvatar: ImageView = view.findViewById(R.id.ivReviewerAvatar)
+            val tvName: TextView = view.findViewById(R.id.tvReviewerName)
+            val tvTime: TextView = view.findViewById(R.id.tvReviewTime)
+            val tvStars: TextView = view.findViewById(R.id.tvStars)
+            val tvService: TextView = view.findViewById(R.id.tvServiceReview)
+            val tvText: TextView = view.findViewById(R.id.tvReviewText)
+            val scrollPhotos: android.widget.HorizontalScrollView = view.findViewById(R.id.scrollReviewPhotos)
+            val photosContainer: LinearLayout = view.findViewById(R.id.reviewPhotosContainer)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_review_home, parent, false)
+            return ViewHolder(view)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val review = reviews[position]
+
+            holder.tvName.text = review["userName"] as? String ?: ""
+            holder.tvText.text = review["reviewText"] as? String ?: ""
+            holder.tvStars.text = "⭐".repeat((review["rating"] as? Double ?: 0.0).toInt())
+            holder.tvService.text = review["serviceName"] as? String ?: ""
+
+            // Waktu relatif
+            val timestamp = review["createdAt"] as? com.google.firebase.Timestamp
+            holder.tvTime.text = if (timestamp != null) {
+                val diff = System.currentTimeMillis() - timestamp.toDate().time
+                when {
+                    diff < 60_000L -> "Baru saja"
+                    diff < 3_600_000L -> "${diff / 60_000} menit lalu"
+                    diff < 86_400_000L -> "${diff / 3_600_000} jam lalu"
+                    diff < 604_800_000L -> "${diff / 86_400_000} hari lalu"
+                    diff < 2_592_000_000L -> "${diff / 604_800_000} minggu lalu"
+                    else -> "${diff / 2_592_000_000L} bulan lalu"
+                }
+            } else ""
+
+            // Foto profil user
+            val userPhotoUrl = review["userPhotoUrl"] as? String ?: ""
+            if (userPhotoUrl.isNotEmpty()) {
+                Glide.with(holder.itemView.context)
+                    .load(userPhotoUrl)
+                    .circleCrop()
+                    .placeholder(R.drawable.bg_avatar_circle)
+                    .into(holder.ivAvatar)
+            } else {
+                holder.ivAvatar.setImageResource(R.drawable.bg_avatar_circle)
+            }
+
+            // Foto review
+            val photoUrls = review["photoUrls"] as? List<String> ?: emptyList()
+            holder.photosContainer.removeAllViews()
+            if (photoUrls.isNotEmpty()) {
+                holder.scrollPhotos.visibility = View.VISIBLE
+                photoUrls.forEach { url ->
+                    val size = (64 * holder.itemView.context.resources.displayMetrics.density).toInt()
+                    val margin = (6 * holder.itemView.context.resources.displayMetrics.density).toInt()
+                    val iv = ImageView(holder.itemView.context).apply {
+                        layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = margin }
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                        setBackgroundResource(R.drawable.bg_input_field)
+                        clipToOutline = true
+                    }
+                    Glide.with(holder.itemView.context).load(url).centerCrop().into(iv)
+                    iv.setOnClickListener {
+                        val dialog = android.app.Dialog(holder.itemView.context)
+                        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+                        val imageView = ImageView(holder.itemView.context).apply {
+                            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                            scaleType = ImageView.ScaleType.FIT_CENTER
+                            setBackgroundColor(android.graphics.Color.BLACK)
+                        }
+                        Glide.with(holder.itemView.context).load(url).into(imageView)
+                        imageView.setOnClickListener { dialog.dismiss() }
+                        dialog.setContentView(imageView)
+                        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        dialog.show()
+                    }
+                    holder.photosContainer.addView(iv)
+                }
+            } else {
+                holder.scrollPhotos.visibility = View.GONE
+            }
+        }
+
+        override fun getItemCount() = reviews.size
+    }
+
     private fun loadPets() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseFirestore.getInstance()
+        petsListener = FirebaseFirestore.getInstance()
             .collection("pets")
             .whereEqualTo("userId", userId)
             .limit(1)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty) {
+            .addSnapshotListener { documents, _ ->
+                if (_binding == null) return@addSnapshotListener
+                if (documents != null && !documents.isEmpty) {
                     val pet = documents.first()
                     val name = pet.getString("name") ?: "Hewan kamu"
                     val type = pet.getString("type") ?: ""
@@ -183,7 +266,7 @@ class HomeFragment : Fragment() {
 
     private fun loadNotifBadge() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        FirebaseFirestore.getInstance()
+        notifBadgeListener = FirebaseFirestore.getInstance()
             .collection("notifications")
             .whereEqualTo("userId", userId)
             .whereEqualTo("isRead", false)
@@ -200,14 +283,14 @@ class HomeFragment : Fragment() {
             }
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadData()
-        loadPets()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        petsListener?.remove()
+        petsListener = null
+        userListener?.remove()
+        userListener = null
+        notifBadgeListener?.remove()
+        notifBadgeListener = null
         _binding = null
     }
 }

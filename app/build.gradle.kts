@@ -55,9 +55,9 @@ dependencies {
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage") // untuk upload foto QRIS
+    implementation("com.google.firebase:firebase-storage")
 
     // Google Auth
     implementation("com.google.android.gms:play-services-auth:21.2.0")

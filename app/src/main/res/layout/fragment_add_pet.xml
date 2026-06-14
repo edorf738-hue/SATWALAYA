@@ -10,26 +10,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="32dp">
+        android:paddingBottom="100dp">
 
-        <!-- Header -->
+        <!-- Top Bar -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
+            android:background="@color/white"
+            android:elevation="2dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="48dp"
-            android:paddingBottom="12dp">
+            android:paddingHorizontal="20dp">
 
             <ImageView
                 android:id="@+id/btnBack"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/bg_avatar_circle"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Kembali"
                 android:padding="6dp"
-                android:src="@android:drawable/ic_menu_revert"
-                android:contentDescription="Kembali" />
+                android:src="@drawable/ic_back"
+                app:tint="@color/text_primary" />
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -39,7 +40,7 @@
                 android:layout_weight="1"
                 android:text="Tambah hewan"
                 android:textColor="@color/text_primary"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -48,12 +49,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="6dp"
+            android:letterSpacing="0.05"
             android:text="INFORMASI DASAR"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:letterSpacing="0.05" />
+            android:textSize="12sp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -61,7 +62,8 @@
             android:layout_marginHorizontal="16dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="14dp"
-            app:cardElevation="0dp">
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,7 +71,6 @@
                 android:orientation="vertical"
                 android:padding="14dp">
 
-                <!-- Foto Hewan -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -81,18 +82,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:gravity="center"
                     android:orientation="vertical">
 
                     <ImageView
                         android:id="@+id/ivPetPhoto"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
                         android:background="@drawable/bg_avatar_circle"
+                        android:contentDescription="Foto hewan"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/bg_pet_icon"
-                        android:contentDescription="Foto hewan" />
+                        android:src="@drawable/bg_pet_icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Ketuk foto untuk mengganti"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -125,7 +134,6 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Nama Hewan -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -138,15 +146,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_input_field"
                     android:hint="Nama anabul kamu"
                     android:inputType="textPersonName"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
-                <!-- Jenis Hewan -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -158,7 +165,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -197,7 +204,6 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-                <!-- Ras -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -210,15 +216,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_input_field"
                     android:hint="Contoh: Persia, Shiba Inu"
                     android:inputType="text"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
-                <!-- Umur -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -231,15 +236,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_input_field"
                     android:hint="Contoh: 2 tahun"
                     android:inputType="text"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
-                <!-- Berat -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -255,7 +259,7 @@
                     android:background="@drawable/bg_input_field"
                     android:hint="Contoh: 4"
                     android:inputType="numberDecimal"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -266,12 +270,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
+            android:letterSpacing="0.05"
             android:text="KESEHATAN"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:letterSpacing="0.05" />
+            android:textSize="12sp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -279,7 +283,8 @@
             android:layout_marginHorizontal="16dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="14dp"
-            app:cardElevation="0dp">
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -299,11 +304,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_input_field"
                     android:hint="Tulis jika ada, kosongkan jika tidak"
                     android:inputType="text"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
@@ -319,11 +324,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="10dp"
                     android:background="@drawable/bg_input_field"
                     android:hint="Contoh: 3x sehari (pagi, siang, sore)"
                     android:inputType="text"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
@@ -342,7 +347,7 @@
                     android:background="@drawable/bg_input_field"
                     android:hint="Contoh: Royal Canin Indoor"
                     android:inputType="text"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -352,12 +357,11 @@
         <TextView
             android:id="@+id/btnSave"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/bg_gradient_button"
             android:gravity="center"
-            android:paddingVertical="14dp"
             android:text="Simpan"
             android:textColor="@color/white"
             android:textSize="14sp"

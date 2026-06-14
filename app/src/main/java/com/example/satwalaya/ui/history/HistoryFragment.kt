@@ -17,6 +17,7 @@ import com.example.satwalaya.R
 import com.example.satwalaya.databinding.FragmentHistoryBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import androidx.navigation.fragment.findNavController
@@ -26,6 +27,7 @@ class HistoryFragment : Fragment() {
     private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
 
+    private var bookingsListener: ListenerRegistration? = null
     private var selectedPhotoUris: MutableList<Uri> = mutableListOf()
     private var currentDialogView: View? = null
 
@@ -52,24 +54,18 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
-    }
 
-    override fun onResume() {
-        super.onResume()
-        loadBookings()
-    }
-
-    private fun loadBookings() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        db.collection("bookings")
-            .whereEqualTo("userId", userId)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        bookingsListener = db.collection("bookings")
+            .whereEqualTo("userId", uid)
             .orderBy("createdAt", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { result ->
-                if (_binding == null) return@addOnSuccessListener
-
-                if (result.isEmpty) {
+            .addSnapshotListener { result, error ->
+                if (_binding == null) return@addSnapshotListener
+                if (error != null) {
+                    Toast.makeText(requireContext(), "Gagal memuat data", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+                if (result == null || result.isEmpty) {
                     binding.emptyState.visibility = View.VISIBLE
                     binding.rvHistory.visibility = View.GONE
                 } else {
@@ -96,10 +92,6 @@ class HistoryFragment : Fragment() {
                         onCancelClick = { booking -> showCancelDialog(booking) }
                     )
                 }
-            }
-            .addOnFailureListener {
-                if (_binding == null) return@addOnFailureListener
-                Toast.makeText(requireContext(), "Gagal memuat data", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -158,7 +150,6 @@ class HistoryFragment : Fragment() {
                 db.collection("bookings").document(id).delete()
                     .addOnSuccessListener {
                         Toast.makeText(requireContext(), "Booking dibatalkan", Toast.LENGTH_SHORT).show()
-                        loadBookings()
                     }
                     .addOnFailureListener {
                         Toast.makeText(requireContext(), "Gagal membatalkan", Toast.LENGTH_SHORT).show()
@@ -259,27 +250,60 @@ class HistoryFragment : Fragment() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val userName = booking["ownerName"] as? String ?: ""
 
-        val review = hashMapOf(
-            "userId" to userId,
-            "userName" to userName,
-            "bookingId" to (booking["id"] as String),
-            "serviceName" to (booking["serviceName"] as String),
-            "petNames" to (booking["petNames"] as String),
-            "rating" to rating,
-            "reviewText" to reviewText,
-            "photoUrls" to photoUrls,
-            "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
-        )
+        // Ambil photoUrl user dari Firestore dulu
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { userDoc ->
+                val userPhotoUrl = userDoc.getString("photoUrl") ?: ""
 
-        db.collection("reviews").add(review)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Review berhasil dikirim!", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
+                val review = hashMapOf(
+                    "userId" to userId,
+                    "userName" to userName,
+                    "userPhotoUrl" to userPhotoUrl,
+                    "bookingId" to (booking["id"] as String),
+                    "serviceName" to (booking["serviceName"] as String),
+                    "petNames" to (booking["petNames"] as String),
+                    "rating" to rating,
+                    "reviewText" to reviewText,
+                    "photoUrls" to photoUrls,
+                    "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                )
+
+                db.collection("reviews").add(review)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Review berhasil dikirim!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Gagal mengirim review", Toast.LENGTH_SHORT).show()
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Kirim"
+                    }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Gagal mengirim review", Toast.LENGTH_SHORT).show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Kirim"
+                // Kalau gagal ambil foto user, tetap simpan review tanpa foto profil
+                val review = hashMapOf(
+                    "userId" to userId,
+                    "userName" to userName,
+                    "userPhotoUrl" to "",
+                    "bookingId" to (booking["id"] as String),
+                    "serviceName" to (booking["serviceName"] as String),
+                    "petNames" to (booking["petNames"] as String),
+                    "rating" to rating,
+                    "reviewText" to reviewText,
+                    "photoUrls" to photoUrls,
+                    "createdAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                )
+
+                db.collection("reviews").add(review)
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Review berhasil dikirim!", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Gagal mengirim review", Toast.LENGTH_SHORT).show()
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).text = "Kirim"
+                    }
             }
     }
 
@@ -289,6 +313,8 @@ class HistoryFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        bookingsListener?.remove()
+        bookingsListener = null
         _binding = null
         currentDialogView = null
     }

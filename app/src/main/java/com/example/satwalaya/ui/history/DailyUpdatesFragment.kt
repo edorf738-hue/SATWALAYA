@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.example.satwalaya.R
 import com.example.satwalaya.databinding.FragmentDailyUpdatesBinding
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 
 class DailyUpdatesFragment : Fragment() {
@@ -25,6 +26,7 @@ class DailyUpdatesFragment : Fragment() {
 
     private var bookingId = ""
     private var petNames = ""
+    private var updatesListener: ListenerRegistration? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDailyUpdatesBinding.inflate(inflater, container, false)
@@ -47,13 +49,17 @@ class DailyUpdatesFragment : Fragment() {
     }
 
     private fun loadUpdates() {
-        FirebaseFirestore.getInstance()
+        updatesListener = FirebaseFirestore.getInstance()
             .collection("daily_updates")
             .whereEqualTo("bookingId", bookingId)
             .orderBy("date", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { result ->
-                if (_binding == null) return@addOnSuccessListener
+            .addSnapshotListener { result, error ->
+                if (_binding == null) return@addSnapshotListener
+                if (error != null || result == null) {
+                    binding.emptyState.visibility = View.VISIBLE
+                    binding.rvUpdates.visibility = View.GONE
+                    return@addSnapshotListener
+                }
 
                 if (result.isEmpty) {
                     binding.emptyState.visibility = View.VISIBLE
@@ -85,11 +91,6 @@ class DailyUpdatesFragment : Fragment() {
 
                     binding.rvUpdates.adapter = UpdatesAdapter(updates)
                 }
-            }
-            .addOnFailureListener {
-                if (_binding == null) return@addOnFailureListener
-                binding.emptyState.visibility = View.VISIBLE
-                binding.rvUpdates.visibility = View.GONE
             }
     }
 
@@ -183,6 +184,8 @@ class DailyUpdatesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        updatesListener?.remove()
+        updatesListener = null
         _binding = null
     }
 }

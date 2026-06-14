@@ -60,8 +60,10 @@ class EditProfileFragment : BaseFragment() {
         binding.etEditPhone.setText(sessionManager.getPhone())
 
         binding.tvChangePhoto.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK).apply {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "image/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             pickImageLauncher.launch(intent)
         }
@@ -75,10 +77,23 @@ class EditProfileFragment : BaseFragment() {
                 if (selectedImageUri != null) {
                     uploadPhoto(name, email, phone)
                 } else {
-                    FirebaseAuth.getInstance().currentUser?.updateEmail(email)
-                    sessionManager.saveLoginSession(name, email, phone)
-                    Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
+                    FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(userId)
+                        .update(mapOf(
+                            "name" to name,
+                            "email" to email,
+                            "phone" to phone
+                        ))
+                        .addOnSuccessListener {
+                            sessionManager.saveLoginSession(name, email, phone)
+                            Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(requireContext(), "Gagal update profil", Toast.LENGTH_SHORT).show()
+                        }
                 }
             } else {
                 Toast.makeText(requireContext(), "Nama dan Email wajib diisi", Toast.LENGTH_SHORT).show()
@@ -98,17 +113,26 @@ class EditProfileFragment : BaseFragment() {
             .addOnSuccessListener {
                 storageRef.downloadUrl.addOnSuccessListener { uri ->
                     val photoUrl = uri.toString()
-                    sessionManager.savePhotoUrl(photoUrl)
-                    sessionManager.saveLoginSession(name, email, phone)
-
-                    // Simpan photoUrl ke Firestore
                     FirebaseFirestore.getInstance()
                         .collection("users")
                         .document(userId)
-                        .update("photoUrl", photoUrl)
-
-                    Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
-                    findNavController().popBackStack()
+                        .update(mapOf(
+                            "name" to name,
+                            "email" to email,
+                            "phone" to phone,
+                            "photoUrl" to photoUrl
+                        ))
+                        .addOnSuccessListener {
+                            sessionManager.savePhotoUrl(photoUrl)
+                            sessionManager.saveLoginSession(name, email, phone)
+                            Toast.makeText(requireContext(), "Profil berhasil diperbarui!", Toast.LENGTH_SHORT).show()
+                            findNavController().popBackStack()
+                        }
+                        .addOnFailureListener {
+                            binding.btnSaveProfile.isEnabled = true
+                            binding.btnSaveProfile.text = "Simpan Perubahan"
+                            Toast.makeText(requireContext(), "Gagal update profil", Toast.LENGTH_SHORT).show()
+                        }
                 }
             }
             .addOnFailureListener {

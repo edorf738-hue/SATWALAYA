@@ -1,7 +1,6 @@
 package com.example.satwalaya.ui.notifications
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import com.example.satwalaya.R
 import com.example.satwalaya.databinding.FragmentNotificationsBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 
 class NotificationsFragment : Fragment() {
@@ -21,6 +21,7 @@ class NotificationsFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private lateinit var adapter: NotificationAdapter
+    private var notifListener: ListenerRegistration? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,25 +39,15 @@ class NotificationsFragment : Fragment() {
         }
 
         adapter = NotificationAdapter(mutableListOf()) { item ->
-            Log.d("NOTIF", "Klik item id=${item.id}, isRead=${item.isRead}")
-
-            // Update Firestore
             if (item.id.isNotEmpty()) {
                 db.collection("notifications").document(item.id)
                     .update("isRead", true)
-                    .addOnSuccessListener {
-                        Log.d("NOTIF", "isRead updated sukses untuk id=${item.id}")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("NOTIF", "Gagal update isRead: ${e.message}")
-                    }
-            } else {
-                Log.e("NOTIF", "item.id kosong! tidak bisa update Firestore")
             }
 
-            // Navigate ke history jika bookingId valid
             if (item.bookingId.isNotEmpty() && item.bookingId != "dummy") {
-                findNavController().navigate(R.id.nav_history)
+                findNavController().popBackStack()
+                val bottomNav = requireActivity().findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
+                bottomNav?.selectedItemId = R.id.nav_history
             }
         }
 
@@ -73,19 +64,14 @@ class NotificationsFragment : Fragment() {
     private fun loadNotifications() {
         val userId = auth.currentUser?.uid ?: return
 
-        db.collection("notifications")
+        notifListener = db.collection("notifications")
             .whereEqualTo("userId", userId)
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, error ->
-                if (error != null || snapshots == null) {
-                    Log.e("NOTIF", "Snapshot error: ${error?.message}")
-                    return@addSnapshotListener
-                }
+                if (error != null || snapshots == null) return@addSnapshotListener
 
                 val list = snapshots.documents.mapNotNull { doc ->
-                    val item = doc.toObject(NotificationItem::class.java)?.copy(id = doc.id)
-                    Log.d("NOTIF", "Doc id=${doc.id}, isRead=${item?.isRead}")
-                    item
+                    doc.toObject(NotificationItem::class.java)?.copy(id = doc.id)
                 }
 
                 adapter.updateItems(list)
@@ -105,17 +91,13 @@ class NotificationsFragment : Fragment() {
                 val batch = db.batch()
                 docs.forEach { batch.update(it.reference, "isRead", true) }
                 batch.commit()
-                    .addOnSuccessListener {
-                        Log.d("NOTIF", "Mark all read sukses")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("NOTIF", "Mark all read gagal: ${e.message}")
-                    }
             }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        notifListener?.remove()
+        notifListener = null
         _binding = null
     }
 }

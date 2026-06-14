@@ -58,6 +58,12 @@
         <action
             android:id="@+id/action_nav_profile_to_helpSupportFragment"
             app:destination="@id/helpSupportFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_notificationSettingsFragment"
+            app:destination="@id/notificationSettingsFragment" />
+        <action
+            android:id="@+id/action_nav_profile_to_changePasswordFragment"
+            app:destination="@id/changePasswordFragment" />
     </fragment>
 
     <fragment
@@ -145,5 +151,17 @@
         android:name="com.example.satwalaya.ui.review.ReviewListFragment"
         android:label="Ulasan Pelanggan"
         tools:layout="@layout/fragment_review_list" />
+
+    <fragment
+        android:id="@+id/notificationSettingsFragment"
+        android:name="com.example.satwalaya.ui.notifications.NotificationSettingsFragment"
+        android:label="Pengaturan Notifikasi"
+        tools:layout="@layout/fragment_notification_settings" />
+
+    <fragment
+        android:id="@+id/changePasswordFragment"
+        android:name="com.example.satwalaya.ui.profile.ChangePasswordFragment"
+        android:label="Ubah Kata Sandi"
+        tools:layout="@layout/fragment_change_password" />
 
 </navigation>

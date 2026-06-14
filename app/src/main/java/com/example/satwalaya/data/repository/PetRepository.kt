@@ -3,6 +3,7 @@ package com.example.satwalaya.data.repository
 import android.net.Uri
 import com.example.satwalaya.data.model.Pet
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 
 class PetRepository {
@@ -58,6 +59,30 @@ class PetRepository {
                 .addOnSuccessListener { onSuccess() }
                 .addOnFailureListener { e -> onFailure(e) }
         }
+    }
+
+    fun getPetsRealtime(userId: String, onUpdate: (List<Pet>) -> Unit): ListenerRegistration {
+        return db.collection("pets")
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { result, _ ->
+                if (result == null) return@addSnapshotListener
+                val pets = result.documents.map { doc ->
+                    Pet(
+                        id = doc.id,
+                        userId = doc.getString("userId") ?: "",
+                        name = doc.getString("name") ?: "",
+                        type = doc.getString("type") ?: "",
+                        breed = doc.getString("breed") ?: "",
+                        age = doc.getString("age") ?: "",
+                        weight = doc.getString("weight") ?: "",
+                        allergy = doc.getString("allergy") ?: "",
+                        feedSchedule = doc.getString("feedSchedule") ?: "",
+                        feedType = doc.getString("feedType") ?: "",
+                        photoUrl = doc.getString("photoUrl") ?: ""
+                    )
+                }
+                onUpdate(pets)
+            }
     }
 
     fun getPets(

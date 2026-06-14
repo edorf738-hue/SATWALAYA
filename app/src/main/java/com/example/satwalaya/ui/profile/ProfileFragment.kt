@@ -1,11 +1,15 @@
 package com.example.satwalaya.ui.profile
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.satwalaya.R
@@ -13,12 +17,15 @@ import com.example.satwalaya.utils.SessionManager
 import com.example.satwalaya.databinding.FragmentProfileBinding
 import com.example.satwalaya.ui.auth.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.bumptech.glide.Glide
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private var profileListener: ListenerRegistration? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -29,7 +36,27 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         sessionManager = SessionManager(requireContext())
 
-        updateUI()
+        val user = FirebaseAuth.getInstance().currentUser
+        val cachedName = sessionManager.getUsername().ifEmpty { user?.displayName?.ifEmpty { "Pet Owner" } ?: "Pet Owner" }
+        val cachedEmail = sessionManager.getEmail().ifEmpty { user?.email ?: "user@satwalaya.com" }
+        bindProfileData(cachedName, cachedEmail, sessionManager.getPhotoUrl())
+
+        val uid = user?.uid
+        if (uid != null) {
+            profileListener = FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(uid)
+                .addSnapshotListener { doc, _ ->
+                    if (!isAdded || _binding == null || doc == null) return@addSnapshotListener
+                    val name = doc.getString("name")?.ifEmpty { null } ?: sessionManager.getUsername()
+                    val email = doc.getString("email")?.ifEmpty { null } ?: sessionManager.getEmail()
+                    val phone = doc.getString("phone") ?: sessionManager.getPhone()
+                    val photoUrl = doc.getString("photoUrl") ?: sessionManager.getPhotoUrl()
+                    bindProfileData(name, email, photoUrl)
+                    sessionManager.saveLoginSession(name, email, phone)
+                    if (photoUrl.isNotEmpty()) sessionManager.savePhotoUrl(photoUrl)
+                }
+        }
 
         binding.menuEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_nav_profile_to_editProfileFragment)
@@ -38,10 +65,14 @@ class ProfileFragment : Fragment() {
             findNavController().navigate(R.id.action_nav_profile_to_petListFragment)
         }
         binding.menuNotifications.setOnClickListener {
-            findNavController().navigate(R.id.action_nav_profile_to_notificationsFragment)
+            findNavController().navigate(R.id.action_nav_profile_to_notificationSettingsFragment)
         }
+        val isGoogleUser = FirebaseAuth.getInstance().currentUser?.providerData
+            ?.any { it.providerId == "google.com" } ?: false
+        binding.menuChangePassword.visibility = if (isGoogleUser) View.GONE else View.VISIBLE
+        binding.dividerAbout.visibility = if (isGoogleUser) View.GONE else View.VISIBLE
         binding.menuChangePassword.setOnClickListener {
-            showChangePasswordDialog()
+            findNavController().navigate(R.id.action_nav_profile_to_changePasswordFragment)
         }
         binding.menuHelp.setOnClickListener {
             findNavController().navigate(R.id.action_nav_profile_to_helpSupportFragment)
@@ -54,44 +85,42 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun updateUI() {
-        val user = FirebaseAuth.getInstance().currentUser
-
-        val savedName = sessionManager.getUsername()
-        binding.tvProfileName.text = if (savedName.isNotEmpty()) savedName
-        else user?.displayName?.ifEmpty { "Pet Owner" } ?: "Pet Owner"
-
-        val savedEmail = sessionManager.getEmail()
-        binding.tvProfileEmail.text = if (savedEmail.isNotEmpty()) savedEmail
-        else user?.email ?: "user@satwalaya.com"
-
-        // Load foto profil
-        val photoUrl = sessionManager.getPhotoUrl()
+    private fun bindProfileData(name: String, email: String, photoUrl: String) {
+        binding.tvProfileName.text = name
+        binding.tvProfileEmail.text = email
         if (photoUrl.isNotEmpty()) {
             Glide.with(this)
                 .load(photoUrl)
                 .circleCrop()
                 .placeholder(R.drawable.bg_pet_icon)
                 .into(binding.ivProfileAvatar)
+            binding.ivProfileAvatar.setOnClickListener { showFullscreenPhoto(photoUrl) }
+        } else {
+            binding.ivProfileAvatar.setImageResource(R.drawable.bg_pet_icon)
+            binding.ivProfileAvatar.setOnClickListener(null)
         }
     }
-    private fun showChangePasswordDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Ubah Kata Sandi")
-            .setMessage("Link ubah kata sandi akan dikirim ke email kamu.")
-            .setPositiveButton("Kirim") { _, _ ->
-                val email = sessionManager.getEmail().ifEmpty {
-                    FirebaseAuth.getInstance().currentUser?.email ?: return@setPositiveButton
-                }
-                android.util.Log.d("DEBUG", "Kirim reset ke email: $email")  // ← tambah di sini
-                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-                FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-                android.widget.Toast.makeText(requireContext(), "Link dikirim ke $email", android.widget.Toast.LENGTH_LONG).show()
-            }
-            .setNegativeButton("Batal", null)
-            .show()
-    }
 
+    private fun showFullscreenPhoto(url: String) {
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        val imageView = ImageView(requireContext()).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundColor(Color.BLACK)
+        }
+        Glide.with(requireContext()).load(url).into(imageView)
+        imageView.setOnClickListener { dialog.dismiss() }
+        dialog.setContentView(imageView)
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        dialog.show()
+    }
     private fun showAboutDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("Tentang Satwalaya")
@@ -121,13 +150,10 @@ class ProfileFragment : Fragment() {
             .show()
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateUI()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        profileListener?.remove()
+        profileListener = null
         _binding = null
     }
 }

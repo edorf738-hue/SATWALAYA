@@ -15,30 +15,32 @@
         <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="72dp"
+            android:background="@color/white"
+            android:elevation="2dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="48dp"
-            android:paddingBottom="12dp">
+            android:paddingTop="8dp"
+            android:paddingHorizontal="20dp">
 
             <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_avatar_circle"
-                android:padding="6dp"
-                android:src="@android:drawable/ic_menu_revert"
-                android:contentDescription="Kembali" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Kembali"
+                android:padding="8dp"
+                android:src="@drawable/ic_back"
+                app:tint="@color/text_primary" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:layout_weight="1"
                 android:text="Form booking"
                 android:textColor="@color/text_primary"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -47,11 +49,12 @@
             android:id="@+id/packageBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginHorizontal="16dp"
             android:background="@drawable/bg_icon_green"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="14dp">
+            android:padding="12dp">
 
             <TextView
                 android:id="@+id/tvBannerName"
@@ -77,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -109,7 +112,8 @@
             android:visibility="gone"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="14dp"
-            app:cardElevation="0dp">
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -188,8 +192,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="6dp"
                 android:text="LAYANAN TAMBAHAN"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
@@ -201,13 +205,14 @@
                 android:layout_marginHorizontal="16dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="14dp"
-                app:cardElevation="0dp">
+                app:cardElevation="3dp"
+                app:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="14dp">
+                    android:padding="12dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -294,8 +299,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
             android:text="TANGGAL"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
@@ -317,14 +322,15 @@
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
+                app:cardElevation="3dp"
+                app:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="10dp">
 
                     <TextView
                         android:id="@+id/tvCheckInLabel"
@@ -354,14 +360,15 @@
                 android:layout_weight="1"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
+                app:cardElevation="3dp"
+                app:cardUseCompatPadding="true">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="10dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -387,8 +394,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
             android:text="KONTAK"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
@@ -400,13 +407,14 @@
             android:layout_marginHorizontal="16dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="14dp"
-            app:cardElevation="0dp">
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -441,7 +449,7 @@
                     android:background="@drawable/bg_input_field"
                     android:hint="08xxxxxxxxxx"
                     android:inputType="phone"
-                    android:padding="10dp"
+                    android:padding="9dp"
                     android:textColor="@color/text_primary"
                     android:textSize="13sp" />
 
@@ -460,8 +468,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
             android:text="RINGKASAN HARGA"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
@@ -473,13 +481,14 @@
             android:layout_marginHorizontal="16dp"
             app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="14dp"
-            app:cardElevation="0dp">
+            app:cardElevation="3dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="12dp">
 
                 <LinearLayout
                     android:id="@+id/priceBreakdown"
@@ -537,12 +546,11 @@
         <TextView
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:background="@drawable/bg_gradient_button"
             android:gravity="center"
-            android:paddingVertical="14dp"
             android:text="Lanjut ke pembayaran"
             android:textColor="@color/white"
             android:textSize="14sp"

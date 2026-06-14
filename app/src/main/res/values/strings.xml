@@ -15,6 +15,7 @@
     <string name="create_account">Daftar Akun</string>
     <string name="already_have_account">Sudah punya akun? Masuk</string>
     <string name="email_sample">email@contoh.com</string>
+    <string name="default_web_client_id">60322117734-g80sa8oakjqvn53klvu43dogo4i2rng5.apps.googleusercontent.com</string>
 
     <!-- Home -->
     <string name="hello_pet_owner">Halo, %1$s! 👋</string>

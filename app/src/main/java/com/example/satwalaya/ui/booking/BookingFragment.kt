@@ -11,11 +11,13 @@ import androidx.navigation.fragment.findNavController
 import com.example.satwalaya.R
 import com.example.satwalaya.databinding.FragmentBookingBinding
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class BookingFragment : Fragment() {
     private var _binding: FragmentBookingBinding? = null
     private val binding get() = _binding!!
     private var isHotelTab = true
+    private var servicesListener: ListenerRegistration? = null
 
     companion object {
         var openTab = "hotel"
@@ -28,8 +30,6 @@ class BookingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        loadPackages(isHotel = true)
 
         binding.tabHotel.setOnClickListener {
             if (!isHotelTab) {
@@ -50,28 +50,26 @@ class BookingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        if (openTab == "grooming") {
-            isHotelTab = false
-            updateTabs()
-            loadPackages(isHotel = false)
-        } else {
-            isHotelTab = true
-            updateTabs()
-            loadPackages(isHotel = true)
-        }
+        val requestedGrooming = openTab == "grooming"
         openTab = "hotel"
+        if (requestedGrooming) {
+            isHotelTab = false
+        }
+        updateTabs()
+        loadPackages(isHotel = isHotelTab)
     }
 
     private fun loadPackages(isHotel: Boolean) {
         val category = if (isHotel) "hotel" else "grooming"
-        binding.packageContainer.removeAllViews()
+        servicesListener?.remove()
 
-        FirebaseFirestore.getInstance()
+        servicesListener = FirebaseFirestore.getInstance()
             .collection("services")
             .whereEqualTo("category", category)
-            .get()
-            .addOnSuccessListener { documents ->
-                val packages = documents.sortedBy { it.getString("name") }
+            .addSnapshotListener { snapshots, error ->
+                if (error != null || snapshots == null || _binding == null) return@addSnapshotListener
+                binding.packageContainer.removeAllViews()
+                val packages = snapshots.sortedBy { it.getString("name") }
                 packages.forEach { doc ->
                     val name = doc.getString("name") ?: ""
                     val badge = doc.getString("badge") ?: ""
@@ -139,22 +137,23 @@ class BookingFragment : Fragment() {
                     binding.packageContainer.addView(cardView)
                 }
             }
-            .addOnFailureListener {
-                // gagal load
-            }
     }
 
     private fun updateTabs() {
         if (isHotelTab) {
-            binding.tabHotel.setBackgroundResource(R.drawable.bg_icon_green)
-            binding.tabHotel.setTextColor(resources.getColor(R.color.green_dark, null))
-            binding.tabGrooming.setBackgroundResource(R.drawable.bg_input_field)
-            binding.tabGrooming.setTextColor(resources.getColor(R.color.text_secondary, null))
+            binding.tabHotel.setBackgroundResource(R.drawable.bg_tab_active)
+            binding.tabHotel.setTextColor(android.graphics.Color.parseColor("#6A5AE0"))
+            binding.tabHotel.setTypeface(null, android.graphics.Typeface.BOLD)
+            binding.tabGrooming.setBackgroundResource(R.drawable.bg_tab_inactive)
+            binding.tabGrooming.setTextColor(android.graphics.Color.parseColor("#CCffffff"))
+            binding.tabGrooming.setTypeface(null, android.graphics.Typeface.NORMAL)
         } else {
-            binding.tabGrooming.setBackgroundResource(R.drawable.bg_pet_icon)
-            binding.tabGrooming.setTextColor(resources.getColor(R.color.purple_primary, null))
-            binding.tabHotel.setBackgroundResource(R.drawable.bg_input_field)
-            binding.tabHotel.setTextColor(resources.getColor(R.color.text_secondary, null))
+            binding.tabGrooming.setBackgroundResource(R.drawable.bg_tab_active)
+            binding.tabGrooming.setTextColor(android.graphics.Color.parseColor("#6A5AE0"))
+            binding.tabGrooming.setTypeface(null, android.graphics.Typeface.BOLD)
+            binding.tabHotel.setBackgroundResource(R.drawable.bg_tab_inactive)
+            binding.tabHotel.setTextColor(android.graphics.Color.parseColor("#CCffffff"))
+            binding.tabHotel.setTypeface(null, android.graphics.Typeface.NORMAL)
         }
     }
 
@@ -164,6 +163,8 @@ class BookingFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        servicesListener?.remove()
+        servicesListener = null
         _binding = null
     }
 
