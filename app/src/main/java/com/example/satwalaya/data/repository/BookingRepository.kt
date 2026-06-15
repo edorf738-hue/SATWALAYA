@@ -3,6 +3,7 @@ package com.example.satwalaya.data.repository
 import android.net.Uri
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 
@@ -79,12 +80,13 @@ class BookingRepository {
             .addOnFailureListener { e -> onFailure(e) }
     }
 
-    fun countActiveBookings(userId: String, onResult: (Int) -> Unit) {
-        db.collection("bookings")
+    fun countActiveBookings(userId: String, onResult: (Int) -> Unit): ListenerRegistration {
+        return db.collection("bookings")
             .whereEqualTo("userId", userId)
             .whereIn("status", listOf("Menunggu Kedatangan", "Menunggu Verifikasi", "Confirmed", "Check-in"))
-            .get()
-            .addOnSuccessListener { result -> onResult(result.size()) }
-            .addOnFailureListener { onResult(0) }
+            .addSnapshotListener { snapshots, error ->
+                if (error != null || snapshots == null) { onResult(0); return@addSnapshotListener }
+                onResult(snapshots.size())
+            }
     }
 }

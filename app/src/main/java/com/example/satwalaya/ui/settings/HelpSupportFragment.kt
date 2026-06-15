@@ -26,7 +26,7 @@ class HelpSupportFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnContactWhatsapp.setOnClickListener {
-            val url = "https://api.whatsapp.com/send?phone=6281234567890&text=Halo%20Satwalaya,%20saya%20butuh%20bantuan."
+            val url = "https://api.whatsapp.com/send?phone=6281264497177&text=Halo%20Satwalaya,%20saya%20butuh%20bantuan."
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(url)
             startActivity(intent)
@@ -34,8 +34,7 @@ class HelpSupportFragment : BaseFragment() {
 
         binding.btnContactEmail.setOnClickListener {
             val intent = Intent(Intent.ACTION_SENDTO)
-            intent.data = Uri.parse("mailto:support@satwalaya.com")
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Customer Support Request")
+            intent.data = Uri.parse("mailto:edorf738@gmail.com?subject=Customer%20Support%20Request")
             startActivity(intent)
         }
 

@@ -15,7 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-
+import com.example.satwalaya.R
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var sessionManager: SessionManager
@@ -36,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Setup Google Sign In — pakai default_web_client_id untuk Firebase
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("60322117734-g80sa8oakjqvn53klvu43dogo4i2rng5.apps.googleusercontent.com")
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .requestProfile()
             .build()
@@ -76,8 +76,32 @@ class LoginActivity : AppCompatActivity() {
                     .addOnSuccessListener { firebaseResult ->
                         val name  = firebaseResult.user?.displayName ?: "Pengguna"
                         val email = firebaseResult.user?.email ?: ""
-                        sessionManager.saveLoginSession(username = name, email = email)
-                        navigateToMain()
+                        val uid   = firebaseResult.user?.uid ?: ""
+
+                        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        db.collection("users").document(uid).get()
+                            .addOnSuccessListener { docSnap ->
+                                if (docSnap.exists()) {
+                                    // Dokumen sudah ada — pakai nama dari Firestore, jangan overwrite
+                                    val existingName = docSnap.getString("name") ?: name
+                                    sessionManager.saveLoginSession(username = existingName, email = email)
+                                } else {
+                                    // Dokumen belum ada — buat baru dengan nama Google
+                                    db.collection("users").document(uid)
+                                        .set(mapOf(
+                                            "name" to name,
+                                            "email" to email,
+                                            "loginMethod" to "google"
+                                        ))
+                                    sessionManager.saveLoginSession(username = name, email = email)
+                                }
+                                navigateToMain()
+                            }
+                            .addOnFailureListener {
+                                // Kalau gagal get, fallback pakai nama Google
+                                sessionManager.saveLoginSession(username = name, email = email)
+                                navigateToMain()
+                            }
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "Login Google gagal: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -88,7 +112,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.btnGoogleSignIn.setOnClickListener {
-            googleLauncher.launch(googleSignInClient.signInIntent)
+            googleSignInClient.signOut().addOnCompleteListener {
+                googleLauncher.launch(googleSignInClient.signInIntent)
+            }
         }
 
         binding.tvGoRegister.setOnClickListener {

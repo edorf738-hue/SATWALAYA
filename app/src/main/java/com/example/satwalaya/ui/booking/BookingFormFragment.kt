@@ -411,11 +411,6 @@ class BookingFormFragment : Fragment() {
         return "Rp${String.format("%,d", price).replace(',', '.')}"
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadPets()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -1,8 +1,11 @@
 package com.example.satwalaya.ui.pet
 
+import android.app.Dialog
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -43,8 +46,30 @@ class PetAdapter(
                 .circleCrop()
                 .placeholder(R.drawable.bg_pet_icon)
                 .into(holder.ivPetPhoto)
+            holder.ivPetPhoto.setOnClickListener {
+                val ctx = holder.itemView.context
+                val dialog = Dialog(ctx)
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                val imageView = ImageView(ctx).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                    setBackgroundColor(Color.BLACK)
+                }
+                Glide.with(ctx).load(pet.photoUrl).into(imageView)
+                imageView.setOnClickListener { dialog.dismiss() }
+                dialog.setContentView(imageView)
+                dialog.window?.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                dialog.show()
+            }
         } else {
             holder.ivPetPhoto.setImageResource(R.drawable.bg_pet_icon)
+            holder.ivPetPhoto.setOnClickListener(null)
         }
 
         holder.tvPetVaccine.text = if (pet.allergy.isEmpty() || pet.allergy == "-") {
