@@ -53,4 +53,5 @@
     <color name="amber_dark">#BA7517</color>
     <color name="amber_star">#EF9F27</color>
     <color name="card_border">#14000000</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>
